@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 6.2.2
- * Release date: 19/12/2018 (built at 18/12/2018 14:40:17)
+ * Release date: 19/12/2018 (built at 05/02/2019 18:07:37)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -9138,7 +9138,8 @@ TextEditor.prototype.prepare = function (row, col, prop, td, originalValue, cell
   _baseEditor.default.prototype.prepare.apply(this, [row, col, prop, td, originalValue, cellProperties].concat(args));
 
   if (!cellProperties.readOnly) {
-    this.refreshDimensions(true);
+    this.refreshDimensions(); // We do not force dimensions refreshing, it's performance impact
+
     var allowInvalid = cellProperties.allowInvalid,
         fragmentSelection = cellProperties.fragmentSelection;
 
@@ -9277,7 +9278,7 @@ var onBeforeKeyDown = function onBeforeKeyDown(event) {
 };
 
 TextEditor.prototype.open = function () {
-  this.refreshDimensions(); // need it instantly, to prevent https://github.com/handsontable/handsontable/issues/348
+  this.refreshDimensions(true); // need it instantly, to prevent https://github.com/handsontable/handsontable/issues/348
 
   this.showEditableElement();
   this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
@@ -12314,6 +12315,14 @@ function Core(rootElement, userSettings) {
       priv.firstRun = false;
     }
 
+    this.view.wt.wtTable.hider.offsetWidthCached = this.view.wt.wtTable.hider.offsetWidth;
+    this.view.wt.wtTable.hider.offsetHeightCached = this.view.wt.wtTable.hider.offsetHeight;
+    this.view.wt.wtTable.hider.clientWidthCached = this.view.wt.wtTable.hider.clientWidth;
+    this.view.wt.wtTable.hider.clientHeightCached = this.view.wt.wtTable.hider.clientHeight;
+    this.view.wt.wtTable.holder.offsetWidthCached = this.view.wt.wtTable.holder.offsetWidth;
+    this.view.wt.wtTable.holder.offsetHeightCached = this.view.wt.wtTable.holder.offsetHeight;
+    this.view.wt.wtTable.holder.clientWidthCached = this.view.wt.wtTable.holder.clientWidth;
+    this.view.wt.wtTable.holder.clientHeightCached = this.view.wt.wtTable.holder.clientHeight;
     instance.runHooks('afterInit');
   };
 
@@ -19502,13 +19511,14 @@ function () {
     key: "draw",
     value: function draw() {
       var fastDraw = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var afterScroll = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       this.drawInterrupted = false;
 
       if (!fastDraw && !(0, _element.isVisible)(this.wtTable.TABLE)) {
         // draw interrupted because TABLE is not visible
         this.drawInterrupted = true;
       } else {
-        this.wtTable.draw(fastDraw);
+        this.wtTable.draw(fastDraw, afterScroll);
       }
 
       return this;
@@ -19859,6 +19869,17 @@ function () {
         if (_this.instance.getSetting('stretchH') !== 'none') {
           _this.instance.draw();
         }
+
+        _this.instance.wtTable.tableOffset = 0;
+        _this.instance.wtTable.holderOffset = 0;
+        _this.instance.wtTable.hider.offsetWidthCached = _this.instance.wtTable.hider.offsetWidth;
+        _this.instance.wtTable.hider.offsetHeightCached = _this.instance.wtTable.hider.offsetHeight;
+        _this.instance.wtTable.hider.clientWidthCached = _this.instance.wtTable.hider.clientWidth;
+        _this.instance.wtTable.hider.clientHeightCached = _this.instance.wtTable.hider.clientHeight;
+        _this.instance.wtTable.holder.offsetWidthCached = _this.instance.wtTable.holder.offsetWidth;
+        _this.instance.wtTable.holder.offsetHeightCached = _this.instance.wtTable.holder.offsetHeight;
+        _this.instance.wtTable.holder.clientWidthCached = _this.instance.wtTable.holder.clientWidth;
+        _this.instance.wtTable.holder.clientHeightCached = _this.instance.wtTable.holder.clientHeight;
       });
     }
     /**
@@ -20291,7 +20312,7 @@ function () {
 
   }, {
     key: "refreshAll",
-    value: function refreshAll() {
+    value: function refreshAll(afterScroll) {
       if (!this.wot.drawn) {
         return;
       }
@@ -20302,7 +20323,7 @@ function () {
         return;
       }
 
-      this.wot.draw(true);
+      this.wot.draw(true, afterScroll);
 
       if (this.verticalScrolling) {
         this.leftOverlay.onScroll();
@@ -20575,7 +20596,7 @@ function () {
         leftHolder.scrollTop = scrollTop;
       }
 
-      this.refreshAll();
+      this.refreshAll(true);
     }
     /**
      * Synchronize overlay scrollbars with the master scrollbar
@@ -21198,6 +21219,11 @@ function () {
       scrollbarHeight: 10,
       renderAllRows: false,
       groups: false,
+      cacheCellSizes: false,
+      rowsWithTopBorder: null,
+      columnsWithLeftBorder: null,
+      skipResettingOverlays: false,
+      optimizeTableScroll: false,
       rowHeaderWidth: null,
       columnHeaderHeight: null,
       headerClassName: null
@@ -21528,18 +21554,22 @@ function () {
 
   }, {
     key: "draw",
-    value: function draw(fastDraw) {
+    value: function draw(fastDraw, afterScroll) {
       var _this$wot = this.wot,
           wtOverlays = _this$wot.wtOverlays,
           wtViewport = _this$wot.wtViewport;
       var totalRows = this.instance.getSetting('totalRows');
       var rowHeaders = this.wot.getSetting('rowHeaders').length;
       var columnHeaders = this.wot.getSetting('columnHeaders').length;
+      var skipResettingOverlays = this.wot.getSetting('skipResettingOverlays');
       var syncScroll = false;
       var runFastDraw = fastDraw;
 
       if (!this.isWorkingOnClone()) {
-        this.holderOffset = (0, _element.offset)(this.holder);
+        if (!this.holderOffset) {
+          this.holderOffset = (0, _element.offset)(this.holder);
+        }
+
         runFastDraw = wtViewport.createRenderCalculators(runFastDraw);
 
         if (rowHeaders && !this.wot.getSetting('fixedColumnsLeft')) {
@@ -21569,7 +21599,7 @@ function () {
       } else {
         if (this.isWorkingOnClone()) {
           this.tableOffset = this.wot.cloneSource.wtTable.tableOffset;
-        } else {
+        } else if (!this.tableOffset) {
           this.tableOffset = (0, _element.offset)(this.TABLE);
         }
 
@@ -21595,13 +21625,13 @@ function () {
         this.columnFilter = new _column.default(startColumn, this.wot.getSetting('totalColumns'), rowHeaders);
         this.alignOverlaysWithTrimmingContainer();
 
-        this._doDraw(); // creates calculator after draw
+        this._doDraw(runFastDraw); // creates calculator after draw
 
       }
 
-      this.refreshSelections(runFastDraw);
+      this.refreshSelections(runFastDraw, afterScroll);
 
-      if (!this.isWorkingOnClone()) {
+      if (!this.isWorkingOnClone() && (!skipResettingOverlays || !runFastDraw)) {
         wtOverlays.topOverlay.resetFixedPosition();
 
         if (wtOverlays.bottomOverlay.clone) {
@@ -21628,9 +21658,9 @@ function () {
     }
   }, {
     key: "_doDraw",
-    value: function _doDraw() {
+    value: function _doDraw(runFastDraw) {
       var wtRenderer = new _tableRenderer.default(this);
-      wtRenderer.render();
+      wtRenderer.render(runFastDraw);
     }
   }, {
     key: "removeClassFromCells",
@@ -21649,8 +21679,8 @@ function () {
 
   }, {
     key: "refreshSelections",
-    value: function refreshSelections(fastDraw) {
-      if (!this.wot.selections) {
+    value: function refreshSelections(fastDraw, afterScroll) {
+      if (!this.wot.selections || afterScroll && fastDraw) {
         return;
       }
 
@@ -22153,7 +22183,7 @@ function () {
 
   _createClass(TableRenderer, [{
     key: "render",
-    value: function render() {
+    value: function render(fastDraw) {
       if (!this.wtTable.isWorkingOnClone()) {
         var skipRender = {};
         this.wot.getSetting('beforeDraw', true, skipRender);
@@ -22173,6 +22203,7 @@ function () {
       var rowsToRender = this.wtTable.getRenderedRowsCount();
       var totalColumns = this.wot.getSetting('totalColumns');
       var totalRows = this.wot.getSetting('totalRows');
+      var optimizeTableScroll = this.wot.getSetting('optimizeTableScroll');
       var workspaceWidth;
       var adjusted = false;
 
@@ -22191,23 +22222,25 @@ function () {
 
         this.renderRows(totalRows, rowsToRender, columnsToRender);
 
-        if (!this.wtTable.isWorkingOnClone()) {
+        if (!this.wtTable.isWorkingOnClone() && (!optimizeTableScroll || !fastDraw)) {
           workspaceWidth = this.wot.wtViewport.getWorkspaceWidth();
           this.wot.wtViewport.containerWidth = null;
         }
 
-        this.adjustColumnWidths(columnsToRender);
-        this.markOversizedColumnHeaders();
-        this.adjustColumnHeaderHeights();
+        if (!optimizeTableScroll || !fastDraw) {
+          this.adjustColumnWidths(columnsToRender);
+          this.markOversizedColumnHeaders();
+          this.adjustColumnHeaderHeights();
+        }
       }
 
-      if (!adjusted) {
+      if (!adjusted && (!optimizeTableScroll || !fastDraw)) {
         this.adjustAvailableNodes();
       }
 
       this.removeRedundantRows(rowsToRender);
 
-      if (!this.wtTable.isWorkingOnClone() || this.wot.isOverlayName(_base.default.CLONE_BOTTOM)) {
+      if ((!optimizeTableScroll || !fastDraw) && (!this.wtTable.isWorkingOnClone() || this.wot.isOverlayName(_base.default.CLONE_BOTTOM))) {
         this.markOversizedRows();
       }
 
@@ -22218,7 +22251,7 @@ function () {
         var hiderWidth = (0, _element.outerWidth)(this.wtTable.hider);
         var tableWidth = (0, _element.outerWidth)(this.wtTable.TABLE);
 
-        if (hiderWidth !== 0 && tableWidth !== hiderWidth) {
+        if (hiderWidth !== 0 && tableWidth !== hiderWidth && (!optimizeTableScroll || !fastDraw)) {
           // Recalculate the column widths, if width changes made in the overlays removed the scrollbar, thus changing the viewport width.
           this.adjustColumnWidths(columnsToRender);
         }
@@ -22523,7 +22556,7 @@ function () {
       var defaultColumnWidth = this.wot.getSetting('defaultColumnWidth');
       var rowHeaderWidthSetting = this.wot.getSetting('rowHeaderWidth');
 
-      if (mainHolder.offsetHeight < mainHolder.scrollHeight) {
+      if (mainHolder.offsetHeightCached < mainHolder.scrollHeightCached) {
         scrollbarCompensation = (0, _element.getScrollbarWidth)();
       }
 
@@ -22866,7 +22899,16 @@ function () {
     this.eventManager = new _eventManager.default(this.wot);
     this.eventManager.addEventListener(window, 'resize', function () {
       _this.clientHeight = _this.getWorkspaceHeight();
+      document.documentElement.clientHeightCached = document.documentElement.clientHeight;
+      document.documentElement.clientWidthCached = document.documentElement.clientWidth;
+      document.documentElement.offsetHeightCached = document.documentElement.offsetHeight;
+      document.documentElement.offsetWidthCached = document.documentElement.offsetWidth;
+      _this.trimmingContainerHeight = (0, _element.outerHeight)(_this.instance.wtOverlays.topOverlay.trimmingContainer);
     });
+    document.documentElement.clientHeightCached = document.documentElement.clientHeight;
+    document.documentElement.clientWidthCached = document.documentElement.clientWidth;
+    document.documentElement.offsetHeightCached = document.documentElement.offsetHeight;
+    document.documentElement.offsetWidthCached = document.documentElement.offsetWidth;
   }
   /**
    * @returns {number}
@@ -22881,9 +22923,14 @@ function () {
       var height = 0;
 
       if (trimmingContainer === window) {
-        height = document.documentElement.clientHeight;
+        height = document.documentElement.clientHeightCached;
       } else {
-        elemHeight = (0, _element.outerHeight)(trimmingContainer); // returns height without DIV scrollbar
+        elemHeight = this.trimmingContainerHeight || (0, _element.outerHeight)(this.instance.wtOverlays.topOverlay.trimmingContainer); // returns height without DIV scrollbar
+
+        if (!this.trimmingContainerHeight) {
+          this.trimmingContainerHeight = elemHeight;
+        } // returns height without DIV scrollbar
+
 
         height = elemHeight > 0 && trimmingContainer.clientHeight > 0 ? trimmingContainer.clientHeight : Infinity;
       }
@@ -22898,7 +22945,7 @@ function () {
       var trimmingContainer = this.instance.wtOverlays.leftOverlay.trimmingContainer;
       var overflow;
       var stretchSetting = this.wot.getSetting('stretchH');
-      var docOffsetWidth = document.documentElement.offsetWidth;
+      var docOffsetWidth = document.documentElement.offsetWidthCached;
       var preventOverflow = this.wot.getSetting('preventOverflow');
 
       if (preventOverflow) {
@@ -22916,7 +22963,7 @@ function () {
         // otherwise continue below, which will allow stretching
         // this is used in `scroll_window.html`
         // TODO test me
-        return document.documentElement.clientWidth;
+        return document.documentElement.clientWidthCached;
       }
 
       if (trimmingContainer !== window) {
@@ -23173,7 +23220,7 @@ function () {
         height -= fixedRowsHeight;
       }
 
-      if (this.wot.wtTable.holder.clientHeight === this.wot.wtTable.holder.offsetHeight) {
+      if (this.wot.wtTable.holder.clientHeightCached === this.wot.wtTable.holder.offsetHeightCached) {
         scrollbarHeight = 0;
       } else {
         scrollbarHeight = (0, _element.getScrollbarWidth)();
@@ -23213,7 +23260,7 @@ function () {
         width -= fixedColumnsWidth;
       }
 
-      if (this.wot.wtTable.holder.clientWidth !== this.wot.wtTable.holder.offsetWidth) {
+      if (this.wot.wtTable.holder.clientWidthCached !== this.wot.wtTable.holder.offsetWidthCached) {
         width -= (0, _element.getScrollbarWidth)();
       }
 
@@ -23425,6 +23472,13 @@ function () {
     key: "registerListeners",
     value: function registerListeners() {
       var _this2 = this;
+
+      if (this.wot.getSetting('cacheCellSizes')) {
+        this.sizeCache = {};
+        this.eventManager.addEventListener(document.body, 'resize', function () {
+          _this2.sizeCache = {};
+        });
+      }
 
       this.eventManager.addEventListener(document.body, 'mousedown', function () {
         return _this2.onMouseDown();
@@ -23695,16 +23749,26 @@ function () {
 
   }, {
     key: "appear",
-    value: function appear(corners) {
+    value: function appear(corners, fastDraw) {
       if (this.disabled) {
         return;
       }
+
+      var localOffset = function localOffset(elementToCheck) {
+        return {
+          left: elementToCheck.offsetLeft,
+          top: elementToCheck.offsetTop
+        };
+      };
 
       var fromRow;
       var toRow;
       var fromColumn;
       var toColumn;
       var rowsCount = this.wot.wtTable.getRenderedRowsCount();
+      var rowsWithTopBorder = this.wot.getSetting('rowsWithTopBorder');
+      var columnsWithLeftBorder = this.wot.getSetting('columnsWithLeftBorder');
+      var cacheCellSizes = this.wot.getSetting('cacheCellSizes');
 
       for (var i = 0; i < rowsCount; i += 1) {
         var s = this.wot.wtTable.rowFilter.renderedToSource(i);
@@ -23752,16 +23816,34 @@ function () {
       var fromTD = this.wot.wtTable.getCell(new _coords.default(fromRow, fromColumn));
       var isMultiple = fromRow !== toRow || fromColumn !== toColumn;
       var toTD = isMultiple ? this.wot.wtTable.getCell(new _coords.default(toRow, toColumn)) : fromTD;
-      var fromOffset = (0, _element.offset)(fromTD);
-      var toOffset = isMultiple ? (0, _element.offset)(toTD) : fromOffset;
-      var containerOffset = (0, _element.offset)(this.wot.wtTable.TABLE);
+      var fromOffset = localOffset(fromTD);
+      var toOffset = isMultiple ? localOffset(toTD) : fromOffset;
       var minTop = fromOffset.top;
       var minLeft = fromOffset.left;
-      var left = minLeft - containerOffset.left - 1;
-      var width = toOffset.left + (0, _element.outerWidth)(toTD) - minLeft;
+      var left = minLeft - 1;
+      var toCachedSizes = cacheCellSizes ? this.sizeCache["".concat(toColumn, "_").concat(toRow)] : null;
+      var toTDWidth;
+      var toTDHeight;
+
+      if (fastDraw && toCachedSizes && toCachedSizes.width) {
+        toTDWidth = toCachedSizes.width;
+        toTDHeight = toCachedSizes.height;
+      } else {
+        toTDWidth = (0, _element.outerWidth)(toTD);
+        toTDHeight = (0, _element.outerHeight)(toTD);
+
+        if (cacheCellSizes) {
+          this.sizeCache["".concat(toColumn, "_").concat(toRow)] = {
+            width: toTDWidth,
+            height: toTDHeight
+          };
+        }
+      }
+
+      var width = toOffset.left + toTDWidth - minLeft;
 
       if (this.isEntireColumnSelected(fromRow, toRow)) {
-        var modifiedValues = this.getDimensionsFromHeader('columns', fromColumn, toColumn, containerOffset);
+        var modifiedValues = this.getDimensionsFromHeader('columns', fromColumn, toColumn, (0, _element.offset)(this.wot.wtTable.TABLE));
         var fromTH = null;
 
         if (modifiedValues) {
@@ -23777,11 +23859,11 @@ function () {
         }
       }
 
-      var top = minTop - containerOffset.top - 1;
-      var height = toOffset.top + (0, _element.outerHeight)(toTD) - minTop;
+      var top = minTop - 1;
+      var height = toOffset.top + toTDHeight - minTop;
 
       if (this.isEntireRowSelected(fromColumn, toColumn)) {
-        var _modifiedValues2 = this.getDimensionsFromHeader('rows', fromRow, toRow, containerOffset);
+        var _modifiedValues2 = this.getDimensionsFromHeader('rows', fromRow, toRow, (0, _element.offset)(this.wot.wtTable.TABLE));
 
         var _fromTH = null;
 
@@ -23800,12 +23882,22 @@ function () {
 
       var style = (0, _element.getComputedStyle)(fromTD);
 
-      if (parseInt(style.borderTopWidth, 10) > 0) {
+      if (rowsWithTopBorder) {
+        if (rowsWithTopBorder.includes(fromRow)) {
+          top += 1;
+          height = height > 0 ? height - 1 : 0;
+        }
+      } else if (parseInt(style.borderTopWidth, 10) > 0) {
         top += 1;
         height = height > 0 ? height - 1 : 0;
       }
 
-      if (parseInt(style.borderLeftWidth, 10) > 0) {
+      if (columnsWithLeftBorder) {
+        if (columnsWithLeftBorder.includes(fromColumn)) {
+          left += 1;
+          width = width > 0 ? width - 1 : 0;
+        }
+      } else if (parseInt(style.borderLeftWidth, 10) > 0) {
         left += 1;
         width = width > 0 ? width - 1 : 0;
       }
@@ -28043,6 +28135,72 @@ DefaultSettings.prototype = {
 
   /**
    * @description
+   * Allows cell widths and heights caching while calculating selection border size
+   *
+   * @type {Boolean}
+   * @default false
+   *
+   * @example
+   * ```js
+   * // allow cell widths and heights caching while calculating selection border size
+   * columnHeaderHeight: true,
+   */
+  cacheCellSizes: false,
+
+  /**
+   * @description
+   * Optimizes selection border size calculation by determining cells of which rows have top border drawn
+   *
+   * @type {Number[]}
+   * @default null
+   *
+   * @example
+   * ```js
+   * rowsWithTopBorder: [0],
+   */
+  rowsWithTopBorder: null,
+
+  /**
+   * @description
+   * Optimizes selection border size calculation by determining cells of which columns have left border drawn
+   *
+   * @type {Number[]}
+   * @default null
+   *
+   * @example
+   * ```js
+   * columnsWithLeftBorder: [0],
+   */
+  columnsWithLeftBorder: null,
+
+  /**
+  * @description
+  * Skips fixed overlays position resetting when scrolling
+  *
+  * @type {Boolean}
+  * @default false
+  *
+  * @example
+  * ```js
+  * skipResettingOverlays: true,
+  */
+  skipResettingOverlays: false,
+
+  /**
+   * @description
+   * Optimizes table scroll handling by disabling some calculation after scroll if possible
+   *
+   * @type {Boolean}
+   * @default false
+   *
+   * @example
+   * ```js
+   * optimizeTableScroll: true,
+   */
+  optimizeTableScroll: false,
+
+  /**
+   * @description
    * Enables the {@link ObserveChanges} plugin switches table into one-way data binding where changes are applied into
    * data source (from outside table) will be automatically reflected in the table.
    *
@@ -29734,7 +29892,7 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "18/12/2018 14:40:17";
+Handsontable.buildDate = "05/02/2019 18:07:37";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "6.2.2";
 var baseVersion = "";
@@ -34576,7 +34734,7 @@ function (_Overlay) {
     key: "adjustRootElementSize",
     value: function adjustRootElementSize() {
       var masterHolder = this.wot.wtTable.holder;
-      var scrollbarHeight = masterHolder.clientHeight === masterHolder.offsetHeight ? 0 : (0, _element.getScrollbarWidth)();
+      var scrollbarHeight = masterHolder.clientHeightCached === masterHolder.offsetHeightCached ? 0 : (0, _element.getScrollbarWidth)();
       var overlayRoot = this.clone.wtTable.holder.parentNode;
       var overlayRootStyle = overlayRoot.style;
       var preventOverflow = this.wot.getSetting('preventOverflow');
@@ -34666,7 +34824,7 @@ function (_Overlay) {
       var mainHolder = sourceInstance.wtTable.holder;
       var scrollbarCompensation = 0;
 
-      if (beyondRendered && mainHolder.offsetWidth !== mainHolder.clientWidth) {
+      if (beyondRendered && mainHolder.offsetWidthCached !== mainHolder.clientWidthCached) {
         scrollbarCompensation = (0, _element.getScrollbarWidth)();
       }
 
@@ -34948,7 +35106,7 @@ function (_Overlay) {
     key: "adjustRootElementSize",
     value: function adjustRootElementSize() {
       var masterHolder = this.wot.wtTable.holder;
-      var scrollbarWidth = masterHolder.clientWidth === masterHolder.offsetWidth ? 0 : (0, _element.getScrollbarWidth)();
+      var scrollbarWidth = masterHolder.clientWidthCached === masterHolder.offsetWidthCached ? 0 : (0, _element.getScrollbarWidth)();
       var overlayRoot = this.clone.wtTable.holder.parentNode;
       var overlayRootStyle = overlayRoot.style;
       var preventOverflow = this.wot.getSetting('preventOverflow');
@@ -35039,7 +35197,7 @@ function (_Overlay) {
       var mainHolder = sourceInstance.wtTable.holder;
       var scrollbarCompensation = 0;
 
-      if (bottomEdge && mainHolder.offsetHeight !== mainHolder.clientHeight) {
+      if (bottomEdge && mainHolder.offsetHeightCached !== mainHolder.clientHeightCached) {
         scrollbarCompensation = (0, _element.getScrollbarWidth)();
       }
 
@@ -35361,7 +35519,7 @@ function (_Overlay) {
       var scrollbarWidth = (0, _element.getScrollbarWidth)();
       var cloneRoot = this.clone.wtTable.holder.parentNode;
 
-      if (this.wot.wtTable.holder.clientHeight === this.wot.wtTable.holder.offsetHeight) {
+      if (this.wot.wtTable.holder.clientHeightCached === this.wot.wtTable.holder.offsetHeightCached) {
         scrollbarWidth = 0;
       }
 
@@ -35500,7 +35658,7 @@ function (_Overlay) {
     key: "adjustRootElementSize",
     value: function adjustRootElementSize() {
       var masterHolder = this.wot.wtTable.holder;
-      var scrollbarWidth = masterHolder.clientWidth === masterHolder.offsetWidth ? 0 : (0, _element.getScrollbarWidth)();
+      var scrollbarWidth = masterHolder.clientWidthCached === masterHolder.offsetWidthCached ? 0 : (0, _element.getScrollbarWidth)();
       var overlayRoot = this.clone.wtTable.holder.parentNode;
       var overlayRootStyle = overlayRoot.style;
 
@@ -35587,7 +35745,7 @@ function (_Overlay) {
       var mainHolder = sourceInstance.wtTable.holder;
       var scrollbarCompensation = 0;
 
-      if (bottomEdge && mainHolder.offsetHeight !== mainHolder.clientHeight) {
+      if (bottomEdge && mainHolder.offsetHeightCached !== mainHolder.clientHeightCached) {
         scrollbarCompensation = (0, _element.getScrollbarWidth)();
       }
 
@@ -35749,7 +35907,7 @@ function (_Overlay) {
       var scrollbarWidth = (0, _element.getScrollbarWidth)();
       var cloneRoot = this.clone.wtTable.holder.parentNode;
 
-      if (this.wot.wtTable.holder.clientHeight === this.wot.wtTable.holder.offsetHeight) {
+      if (this.wot.wtTable.holder.clientHeightCached === this.wot.wtTable.holder.offsetHeightCached) {
         scrollbarWidth = 0;
       }
 
@@ -36047,7 +36205,7 @@ function () {
 
   }, {
     key: "draw",
-    value: function draw(wotInstance) {
+    value: function draw(wotInstance, fastDraw) {
       if (this.isEmpty()) {
         if (this.settings.border) {
           this.getBorder(wotInstance).disappear();
@@ -36141,7 +36299,7 @@ function () {
 
       if (this.settings.border) {
         // warning! border.appear modifies corners!
-        this.getBorder(wotInstance).appear(corners);
+        this.getBorder(wotInstance).appear(corners, fastDraw);
       }
     }
   }]);
@@ -36790,7 +36948,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_370__;
 /* 371 */
 /***/ (function(module, exports) {
 
-
+// removed by extract-text-webpack-plugin
 
 /***/ }),
 /* 372 */
@@ -40601,6 +40759,21 @@ function TableView(instance) {
     columnHeaderHeight: function columnHeaderHeight() {
       var columnHeaderHeight = instance.runHooks('modifyColumnHeaderHeight');
       return that.settings.columnHeaderHeight || columnHeaderHeight;
+    },
+    cacheCellSizes: function cacheCellSizes() {
+      return that.settings.cacheCellSizes;
+    },
+    rowsWithTopBorder: function rowsWithTopBorder() {
+      return that.settings.rowsWithTopBorder;
+    },
+    columnsWithLeftBorder: function columnsWithLeftBorder() {
+      return that.settings.columnsWithLeftBorder;
+    },
+    skipResettingOverlays: function skipResettingOverlays() {
+      return that.settings.skipResettingOverlays;
+    },
+    optimizeTableScroll: function optimizeTableScroll() {
+      return that.settings.optimizeTableScroll;
     }
   };
   instance.runHooks('beforeInitWalkontable', walkontableConfig);
@@ -54985,13 +55158,13 @@ function (_BasePlugin) {
       var scrollLeft = typeof scrollableElement.scrollX === 'number' ? scrollableElement.scrollX : scrollableElement.scrollLeft;
       var tdOffsetLeft = this.hot.view.THEAD.offsetLeft + this.getColumnsWidth(0, priv.coordsColumn);
       var mouseOffsetLeft = priv.target.eventPageX - (priv.rootElementOffset - (scrollableElement.scrollX === void 0 ? scrollLeft : 0));
-      var hiderWidth = wtTable.hider.offsetWidth;
+      var hiderWidth = wtTable.hider.offsetWidthCached;
       var tbodyOffsetLeft = wtTable.TBODY.offsetLeft;
       var backlightElemMarginLeft = this.backlight.getOffset().left;
       var backlightElemWidth = this.backlight.getSize().width;
       var rowHeaderWidth = 0;
 
-      if (priv.rootElementOffset + wtTable.holder.offsetWidth + scrollLeft < priv.target.eventPageX) {
+      if (priv.rootElementOffset + wtTable.holder.offsetWidthCached + scrollLeft < priv.target.eventPageX) {
         if (priv.coordsColumn < priv.countCols) {
           priv.coordsColumn += 1;
         }
@@ -55178,7 +55351,7 @@ function (_BasePlugin) {
         var mouseOffset = event.layerX - (fixedColumns ? wrapperIsWindow : 0);
         var leftOffset = Math.abs(this.getColumnsWidth(start, coords.col) + mouseOffset);
         this.backlight.setPosition(topPos, this.getColumnsWidth(countColumnsFrom, start) + leftOffset);
-        this.backlight.setSize(this.getColumnsWidth(start, end + 1), wtTable.hider.offsetHeight - topPos);
+        this.backlight.setSize(this.getColumnsWidth(start, end + 1), wtTable.hider.offsetHeightCached - topPos);
         this.backlight.setOffset(null, leftOffset * -1);
         (0, _element.addClass)(this.hot.rootElement, CSS_ON_MOVING);
       } else {
@@ -55297,7 +55470,7 @@ function (_BasePlugin) {
       var scrollTop = wtTable.holder.scrollTop;
       var posTop = headerHeight + scrollTop;
       this.backlight.setPosition(posTop);
-      this.backlight.setSize(null, wtTable.hider.offsetHeight - posTop);
+      this.backlight.setSize(null, wtTable.hider.offsetHeightCached - posTop);
     }
     /**
      * `afterCreateCol` hook callback.
@@ -57004,7 +57177,7 @@ function (_BasePlugin) {
         priv.rowsToMove = this.prepareRowsToMoving();
         var leftPos = wtTable.holder.scrollLeft + this.hot.view.wt.wtViewport.getRowHeaderWidth();
         this.backlight.setPosition(null, leftPos);
-        this.backlight.setSize(wtTable.hider.offsetWidth - leftPos, this.getRowsHeight(start, end + 1));
+        this.backlight.setSize(wtTable.hider.offsetWidthCached - leftPos, this.getRowsHeight(start, end + 1));
         this.backlight.setOffset((this.getRowsHeight(start, coords.row) + event.layerY) * -1, null);
         (0, _element.addClass)(this.hot.rootElement, CSS_ON_MOVING);
         this.refreshPositions();
@@ -57124,7 +57297,7 @@ function (_BasePlugin) {
       var scrollLeft = wtTable.holder.scrollLeft;
       var posLeft = headerWidth + scrollLeft;
       this.backlight.setPosition(null, posLeft);
-      this.backlight.setSize(wtTable.hider.offsetWidth - posLeft);
+      this.backlight.setSize(wtTable.hider.offsetWidthCached - posLeft);
     }
     /**
      * `afterCreateRow` hook callback.

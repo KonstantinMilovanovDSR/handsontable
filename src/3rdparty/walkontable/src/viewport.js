@@ -34,7 +34,16 @@ class Viewport {
     this.eventManager = new EventManager(this.wot);
     this.eventManager.addEventListener(window, 'resize', () => {
       this.clientHeight = this.getWorkspaceHeight();
+      document.documentElement.clientHeightCached = document.documentElement.clientHeight;
+      document.documentElement.clientWidthCached = document.documentElement.clientWidth;
+      document.documentElement.offsetHeightCached = document.documentElement.offsetHeight;
+      document.documentElement.offsetWidthCached = document.documentElement.offsetWidth;
+      this.trimmingContainerHeight = outerHeight(this.instance.wtOverlays.topOverlay.trimmingContainer);
     });
+    document.documentElement.clientHeightCached = document.documentElement.clientHeight;
+    document.documentElement.clientWidthCached = document.documentElement.clientWidth;
+    document.documentElement.offsetHeightCached = document.documentElement.offsetHeight;
+    document.documentElement.offsetWidthCached = document.documentElement.offsetWidth;
   }
 
   /**
@@ -46,10 +55,13 @@ class Viewport {
     let height = 0;
 
     if (trimmingContainer === window) {
-      height = document.documentElement.clientHeight;
+      height = document.documentElement.clientHeightCached;
 
     } else {
-      elemHeight = outerHeight(trimmingContainer);
+      elemHeight = this.trimmingContainerHeight || outerHeight(this.instance.wtOverlays.topOverlay.trimmingContainer); // returns height without DIV scrollbar
+      if (!this.trimmingContainerHeight) {
+        this.trimmingContainerHeight = elemHeight;
+      }
       // returns height without DIV scrollbar
       height = (elemHeight > 0 && trimmingContainer.clientHeight > 0) ? trimmingContainer.clientHeight : Infinity;
     }
@@ -63,7 +75,7 @@ class Viewport {
     const trimmingContainer = this.instance.wtOverlays.leftOverlay.trimmingContainer;
     let overflow;
     const stretchSetting = this.wot.getSetting('stretchH');
-    const docOffsetWidth = document.documentElement.offsetWidth;
+    const docOffsetWidth = document.documentElement.offsetWidthCached;
     const preventOverflow = this.wot.getSetting('preventOverflow');
 
     if (preventOverflow) {
@@ -81,7 +93,7 @@ class Viewport {
       // otherwise continue below, which will allow stretching
       // this is used in `scroll_window.html`
       // TODO test me
-      return document.documentElement.clientWidth;
+      return document.documentElement.clientWidthCached;
     }
 
     if (trimmingContainer !== window) {
@@ -322,7 +334,7 @@ class Viewport {
       height -= fixedRowsHeight;
     }
 
-    if (this.wot.wtTable.holder.clientHeight === this.wot.wtTable.holder.offsetHeight) {
+    if (this.wot.wtTable.holder.clientHeightCached === this.wot.wtTable.holder.offsetHeightCached) {
       scrollbarHeight = 0;
     } else {
       scrollbarHeight = getScrollbarWidth();
@@ -363,7 +375,7 @@ class Viewport {
       pos += fixedColumnsWidth;
       width -= fixedColumnsWidth;
     }
-    if (this.wot.wtTable.holder.clientWidth !== this.wot.wtTable.holder.offsetWidth) {
+    if (this.wot.wtTable.holder.clientWidthCached !== this.wot.wtTable.holder.offsetWidthCached) {
       width -= getScrollbarWidth();
     }
 

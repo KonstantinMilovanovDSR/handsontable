@@ -63,6 +63,10 @@ class Border {
    * Register all necessary events
    */
   registerListeners() {
+    if (this.wot.getSetting('cacheCellSizes')) {
+      this.sizeCache = {};
+      this.eventManager.addEventListener(document.body, 'resize', () => { this.sizeCache = {}; });
+    }
     this.eventManager.addEventListener(document.body, 'mousedown', () => this.onMouseDown());
     this.eventManager.addEventListener(document.body, 'mouseup', () => this.onMouseUp());
 
@@ -317,10 +321,17 @@ class Border {
    *
    * @param {Array} corners
    */
-  appear(corners) {
+  appear(corners, fastDraw) {
     if (this.disabled) {
       return;
     }
+
+    const localOffset = function(elementToCheck) {
+      return {
+        left: elementToCheck.offsetLeft,
+        top: elementToCheck.offsetTop
+      };
+    };
 
     let fromRow;
     let toRow;
@@ -328,6 +339,9 @@ class Border {
     let toColumn;
 
     const rowsCount = this.wot.wtTable.getRenderedRowsCount();
+    const rowsWithTopBorder = this.wot.getSetting('rowsWithTopBorder');
+    const columnsWithLeftBorder = this.wot.getSetting('columnsWithLeftBorder');
+    const cacheCellSizes = this.wot.getSetting('cacheCellSizes');
 
     for (let i = 0; i < rowsCount; i += 1) {
       const s = this.wot.wtTable.rowFilter.renderedToSource(i);
@@ -374,17 +388,32 @@ class Border {
     let fromTD = this.wot.wtTable.getCell(new CellCoords(fromRow, fromColumn));
     const isMultiple = (fromRow !== toRow || fromColumn !== toColumn);
     const toTD = isMultiple ? this.wot.wtTable.getCell(new CellCoords(toRow, toColumn)) : fromTD;
-    const fromOffset = offset(fromTD);
-    const toOffset = isMultiple ? offset(toTD) : fromOffset;
-    const containerOffset = offset(this.wot.wtTable.TABLE);
+    const fromOffset = localOffset(fromTD);
+    const toOffset = isMultiple ? localOffset(toTD) : fromOffset;
     const minTop = fromOffset.top;
     const minLeft = fromOffset.left;
 
-    let left = minLeft - containerOffset.left - 1;
-    let width = toOffset.left + outerWidth(toTD) - minLeft;
+    let left = minLeft - 1;
+    const toCachedSizes = cacheCellSizes ? this.sizeCache[`${toColumn}_${toRow}`] : null;
+    let toTDWidth;
+    let toTDHeight;
+    if (fastDraw && toCachedSizes && toCachedSizes.width) {
+      toTDWidth = toCachedSizes.width;
+      toTDHeight = toCachedSizes.height;
+    } else {
+      toTDWidth = outerWidth(toTD);
+      toTDHeight = outerHeight(toTD);
+      if (cacheCellSizes) {
+        this.sizeCache[`${toColumn}_${toRow}`] = {
+          width: toTDWidth,
+          height: toTDHeight
+        };
+      }
+    }
+    let width = toOffset.left + toTDWidth - minLeft;
 
     if (this.isEntireColumnSelected(fromRow, toRow)) {
-      const modifiedValues = this.getDimensionsFromHeader('columns', fromColumn, toColumn, containerOffset);
+      const modifiedValues = this.getDimensionsFromHeader('columns', fromColumn, toColumn, offset(this.wot.wtTable.TABLE));
       let fromTH = null;
 
       if (modifiedValues) {
@@ -396,11 +425,11 @@ class Border {
       }
     }
 
-    let top = minTop - containerOffset.top - 1;
-    let height = toOffset.top + outerHeight(toTD) - minTop;
+    let top = minTop - 1;
+    let height = toOffset.top + toTDHeight - minTop;
 
     if (this.isEntireRowSelected(fromColumn, toColumn)) {
-      const modifiedValues = this.getDimensionsFromHeader('rows', fromRow, toRow, containerOffset);
+      const modifiedValues = this.getDimensionsFromHeader('rows', fromRow, toRow, offset(this.wot.wtTable.TABLE));
       let fromTH = null;
 
       if (modifiedValues) {
@@ -414,11 +443,22 @@ class Border {
 
     const style = getComputedStyle(fromTD);
 
-    if (parseInt(style.borderTopWidth, 10) > 0) {
+    if (rowsWithTopBorder) {
+      if (rowsWithTopBorder.includes(fromRow)) {
+        top += 1;
+        height = height > 0 ? height - 1 : 0;
+      }
+    } else if (parseInt(style.borderTopWidth, 10) > 0) {
       top += 1;
       height = height > 0 ? height - 1 : 0;
     }
-    if (parseInt(style.borderLeftWidth, 10) > 0) {
+
+    if (columnsWithLeftBorder) {
+      if (columnsWithLeftBorder.includes(fromColumn)) {
+        left += 1;
+        width = width > 0 ? width - 1 : 0;
+      }
+    } else if (parseInt(style.borderLeftWidth, 10) > 0) {
       left += 1;
       width = width > 0 ? width - 1 : 0;
     }

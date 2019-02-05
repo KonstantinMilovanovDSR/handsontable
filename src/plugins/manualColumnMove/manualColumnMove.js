@@ -330,13 +330,13 @@ class ManualColumnMove extends BasePlugin {
     const scrollLeft = typeof scrollableElement.scrollX === 'number' ? scrollableElement.scrollX : scrollableElement.scrollLeft;
     let tdOffsetLeft = this.hot.view.THEAD.offsetLeft + this.getColumnsWidth(0, priv.coordsColumn);
     const mouseOffsetLeft = priv.target.eventPageX - (priv.rootElementOffset - (scrollableElement.scrollX === void 0 ? scrollLeft : 0));
-    const hiderWidth = wtTable.hider.offsetWidth;
+    const hiderWidth = wtTable.hider.offsetWidthCached;
     const tbodyOffsetLeft = wtTable.TBODY.offsetLeft;
     const backlightElemMarginLeft = this.backlight.getOffset().left;
     const backlightElemWidth = this.backlight.getSize().width;
     let rowHeaderWidth = 0;
 
-    if ((priv.rootElementOffset + wtTable.holder.offsetWidth + scrollLeft) < priv.target.eventPageX) {
+    if ((priv.rootElementOffset + wtTable.holder.offsetWidthCached + scrollLeft) < priv.target.eventPageX) {
       if (priv.coordsColumn < priv.countCols) {
         priv.coordsColumn += 1;
       }
@@ -519,7 +519,7 @@ class ManualColumnMove extends BasePlugin {
       const leftOffset = Math.abs(this.getColumnsWidth(start, coords.col) + mouseOffset);
 
       this.backlight.setPosition(topPos, this.getColumnsWidth(countColumnsFrom, start) + leftOffset);
-      this.backlight.setSize(this.getColumnsWidth(start, end + 1), wtTable.hider.offsetHeight - topPos);
+      this.backlight.setSize(this.getColumnsWidth(start, end + 1), wtTable.hider.offsetHeightCached - topPos);
       this.backlight.setOffset(null, leftOffset * -1);
 
       addClass(this.hot.rootElement, CSS_ON_MOVING);
@@ -636,7 +636,7 @@ class ManualColumnMove extends BasePlugin {
     const posTop = headerHeight + scrollTop;
 
     this.backlight.setPosition(posTop);
-    this.backlight.setSize(null, wtTable.hider.offsetHeight - posTop);
+    this.backlight.setSize(null, wtTable.hider.offsetHeightCached - posTop);
   }
 
   /**

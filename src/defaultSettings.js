@@ -2653,6 +2653,72 @@ DefaultSettings.prototype = {
 
   /**
    * @description
+   * Allows cell widths and heights caching while calculating selection border size
+   *
+   * @type {Boolean}
+   * @default false
+   *
+   * @example
+   * ```js
+   * // allow cell widths and heights caching while calculating selection border size
+   * columnHeaderHeight: true,
+   */
+  cacheCellSizes: false,
+
+  /**
+   * @description
+   * Optimizes selection border size calculation by determining cells of which rows have top border drawn
+   *
+   * @type {Number[]}
+   * @default null
+   *
+   * @example
+   * ```js
+   * rowsWithTopBorder: [0],
+   */
+  rowsWithTopBorder: null,
+
+  /**
+   * @description
+   * Optimizes selection border size calculation by determining cells of which columns have left border drawn
+   *
+   * @type {Number[]}
+   * @default null
+   *
+   * @example
+   * ```js
+   * columnsWithLeftBorder: [0],
+   */
+  columnsWithLeftBorder: null,
+
+   /**
+   * @description
+   * Skips fixed overlays position resetting when scrolling
+   *
+   * @type {Boolean}
+   * @default false
+   *
+   * @example
+   * ```js
+   * skipResettingOverlays: true,
+   */
+  skipResettingOverlays: false,
+
+  /**
+   * @description
+   * Optimizes table scroll handling by disabling some calculation after scroll if possible
+   *
+   * @type {Boolean}
+   * @default false
+   *
+   * @example
+   * ```js
+   * optimizeTableScroll: true,
+   */
+  optimizeTableScroll: false,
+
+  /**
+   * @description
    * Enables the {@link ObserveChanges} plugin switches table into one-way data binding where changes are applied into
    * data source (from outside table) will be automatically reflected in the table.
    *

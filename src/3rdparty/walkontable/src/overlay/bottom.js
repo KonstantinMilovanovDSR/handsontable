@@ -29,7 +29,7 @@ class BottomOverlay extends Overlay {
     let scrollbarWidth = getScrollbarWidth();
     const cloneRoot = this.clone.wtTable.holder.parentNode;
 
-    if (this.wot.wtTable.holder.clientHeight === this.wot.wtTable.holder.offsetHeight) {
+    if (this.wot.wtTable.holder.clientHeightCached === this.wot.wtTable.holder.offsetHeightCached) {
       scrollbarWidth = 0;
     }
 
@@ -156,7 +156,7 @@ class BottomOverlay extends Overlay {
    */
   adjustRootElementSize() {
     const masterHolder = this.wot.wtTable.holder;
-    const scrollbarWidth = masterHolder.clientWidth === masterHolder.offsetWidth ? 0 : getScrollbarWidth();
+    const scrollbarWidth = masterHolder.clientWidthCached === masterHolder.offsetWidthCached ? 0 : getScrollbarWidth();
     const overlayRoot = this.clone.wtTable.holder.parentNode;
     const overlayRootStyle = overlayRoot.style;
 
@@ -238,7 +238,7 @@ class BottomOverlay extends Overlay {
     const mainHolder = sourceInstance.wtTable.holder;
     let scrollbarCompensation = 0;
 
-    if (bottomEdge && mainHolder.offsetHeight !== mainHolder.clientHeight) {
+    if (bottomEdge && mainHolder.offsetHeightCached !== mainHolder.clientHeightCached) {
       scrollbarCompensation = getScrollbarWidth();
     }
 

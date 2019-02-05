@@ -98,6 +98,11 @@ class Settings {
 
       renderAllRows: false,
       groups: false,
+      cacheCellSizes: false,
+      rowsWithTopBorder: null,
+      columnsWithLeftBorder: null,
+      skipResettingOverlays: false,
+      optimizeTableScroll: false,
       rowHeaderWidth: null,
       columnHeaderHeight: null,
       headerClassName: null

@@ -36,7 +36,7 @@ class BottomLeftCornerOverlay extends Overlay {
     let scrollbarWidth = getScrollbarWidth();
     const cloneRoot = this.clone.wtTable.holder.parentNode;
 
-    if (this.wot.wtTable.holder.clientHeight === this.wot.wtTable.holder.offsetHeight) {
+    if (this.wot.wtTable.holder.clientHeightCached === this.wot.wtTable.holder.offsetHeightCached) {
       scrollbarWidth = 0;
     }
 

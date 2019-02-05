@@ -407,7 +407,12 @@ function TableView(instance) {
     columnHeaderHeight() {
       const columnHeaderHeight = instance.runHooks('modifyColumnHeaderHeight');
       return that.settings.columnHeaderHeight || columnHeaderHeight;
-    }
+    },
+    cacheCellSizes: () => that.settings.cacheCellSizes,
+    rowsWithTopBorder: () => that.settings.rowsWithTopBorder,
+    columnsWithLeftBorder: () => that.settings.columnsWithLeftBorder,
+    skipResettingOverlays: () => that.settings.skipResettingOverlays,
+    optimizeTableScroll: () => that.settings.optimizeTableScroll
   };
 
   instance.runHooks('beforeInitWalkontable', walkontableConfig);

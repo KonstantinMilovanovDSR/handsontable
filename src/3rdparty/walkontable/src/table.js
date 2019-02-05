@@ -191,16 +191,19 @@ class Table {
    * @param {Boolean} fastDraw If TRUE, will try to avoid full redraw and only update the border positions. If FALSE or UNDEFINED, will perform a full redraw
    * @returns {Table}
    */
-  draw(fastDraw) {
+  draw(fastDraw, afterScroll) {
     const { wtOverlays, wtViewport } = this.wot;
     const totalRows = this.instance.getSetting('totalRows');
     const rowHeaders = this.wot.getSetting('rowHeaders').length;
     const columnHeaders = this.wot.getSetting('columnHeaders').length;
+    const skipResettingOverlays = this.wot.getSetting('skipResettingOverlays');
     let syncScroll = false;
     let runFastDraw = fastDraw;
 
     if (!this.isWorkingOnClone()) {
-      this.holderOffset = offset(this.holder);
+      if (!this.holderOffset) {
+        this.holderOffset = offset(this.holder);
+      }
       runFastDraw = wtViewport.createRenderCalculators(runFastDraw);
 
       if (rowHeaders && !this.wot.getSetting('fixedColumnsLeft')) {
@@ -230,7 +233,7 @@ class Table {
     } else {
       if (this.isWorkingOnClone()) {
         this.tableOffset = this.wot.cloneSource.wtTable.tableOffset;
-      } else {
+      } else if (!this.tableOffset) {
         this.tableOffset = offset(this.TABLE);
       }
       let startRow;
@@ -259,11 +262,11 @@ class Table {
       this.columnFilter = new ColumnFilter(startColumn, this.wot.getSetting('totalColumns'), rowHeaders);
 
       this.alignOverlaysWithTrimmingContainer();
-      this._doDraw(); // creates calculator after draw
+      this._doDraw(runFastDraw); // creates calculator after draw
     }
-    this.refreshSelections(runFastDraw);
+    this.refreshSelections(runFastDraw, afterScroll);
 
-    if (!this.isWorkingOnClone()) {
+    if (!this.isWorkingOnClone() && (!skipResettingOverlays || !runFastDraw)) {
       wtOverlays.topOverlay.resetFixedPosition();
 
       if (wtOverlays.bottomOverlay.clone) {
@@ -288,10 +291,10 @@ class Table {
     return this;
   }
 
-  _doDraw() {
+  _doDraw(runFastDraw) {
     const wtRenderer = new TableRenderer(this);
 
-    wtRenderer.render();
+    wtRenderer.render(runFastDraw);
   }
 
   removeClassFromCells(className) {
@@ -307,8 +310,8 @@ class Table {
    *
    * @param {Boolean} fastDraw If fast drawing is enabled than additionally className clearing is applied.
    */
-  refreshSelections(fastDraw) {
-    if (!this.wot.selections) {
+  refreshSelections(fastDraw, afterScroll) {
+    if (!this.wot.selections || afterScroll && fastDraw) {
       return;
     }
     const highlights = Array.from(this.wot.selections);

@@ -148,7 +148,7 @@ class TopOverlay extends Overlay {
    */
   adjustRootElementSize() {
     const masterHolder = this.wot.wtTable.holder;
-    const scrollbarWidth = masterHolder.clientWidth === masterHolder.offsetWidth ? 0 : getScrollbarWidth();
+    const scrollbarWidth = masterHolder.clientWidthCached === masterHolder.offsetWidthCached ? 0 : getScrollbarWidth();
     const overlayRoot = this.clone.wtTable.holder.parentNode;
     const overlayRootStyle = overlayRoot.style;
     const preventOverflow = this.wot.getSetting('preventOverflow');
@@ -236,7 +236,7 @@ class TopOverlay extends Overlay {
     const mainHolder = sourceInstance.wtTable.holder;
     let scrollbarCompensation = 0;
 
-    if (bottomEdge && mainHolder.offsetHeight !== mainHolder.clientHeight) {
+    if (bottomEdge && mainHolder.offsetHeightCached !== mainHolder.clientHeightCached) {
       scrollbarCompensation = getScrollbarWidth();
     }
 
