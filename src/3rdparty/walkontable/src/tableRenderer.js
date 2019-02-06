@@ -45,7 +45,7 @@ class TableRenderer {
   /**
    *
    */
-  render() {
+  render(fastDraw) {
     if (!this.wtTable.isWorkingOnClone()) {
       const skipRender = {};
       this.wot.getSetting('beforeDraw', true, skipRender);
@@ -66,6 +66,7 @@ class TableRenderer {
     const rowsToRender = this.wtTable.getRenderedRowsCount();
     const totalColumns = this.wot.getSetting('totalColumns');
     const totalRows = this.wot.getSetting('totalRows');
+    const optimizeTableScroll = this.wot.getSetting('optimizeTableScroll');
     let workspaceWidth;
     let adjusted = false;
 
@@ -88,22 +89,25 @@ class TableRenderer {
       // Render table rows
       this.renderRows(totalRows, rowsToRender, columnsToRender);
 
-      if (!this.wtTable.isWorkingOnClone()) {
+      if (!this.wtTable.isWorkingOnClone() && (!optimizeTableScroll || !fastDraw)) {
         workspaceWidth = this.wot.wtViewport.getWorkspaceWidth();
         this.wot.wtViewport.containerWidth = null;
       }
 
-      this.adjustColumnWidths(columnsToRender);
-      this.markOversizedColumnHeaders();
-      this.adjustColumnHeaderHeights();
+      if (!optimizeTableScroll || !fastDraw) {
+        this.adjustColumnWidths(columnsToRender);
+        this.markOversizedColumnHeaders();
+        this.adjustColumnHeaderHeights();
+      }
     }
 
-    if (!adjusted) {
+    if (!adjusted && (!optimizeTableScroll || !fastDraw)) {
       this.adjustAvailableNodes();
     }
     this.removeRedundantRows(rowsToRender);
 
-    if (!this.wtTable.isWorkingOnClone() || this.wot.isOverlayName(Overlay.CLONE_BOTTOM)) {
+    if ((!optimizeTableScroll || !fastDraw) && 
+      (!this.wtTable.isWorkingOnClone() || this.wot.isOverlayName(Overlay.CLONE_BOTTOM))) {
       this.markOversizedRows();
     }
     if (!this.wtTable.isWorkingOnClone()) {
@@ -115,7 +119,7 @@ class TableRenderer {
       const hiderWidth = outerWidth(this.wtTable.hider);
       const tableWidth = outerWidth(this.wtTable.TABLE);
 
-      if (hiderWidth !== 0 && (tableWidth !== hiderWidth)) {
+      if (hiderWidth !== 0 && (tableWidth !== hiderWidth) && (!optimizeTableScroll || !fastDraw)) {
         // Recalculate the column widths, if width changes made in the overlays removed the scrollbar, thus changing the viewport width.
         this.adjustColumnWidths(columnsToRender);
       }
@@ -401,7 +405,7 @@ class TableRenderer {
     const defaultColumnWidth = this.wot.getSetting('defaultColumnWidth');
     let rowHeaderWidthSetting = this.wot.getSetting('rowHeaderWidth');
 
-    if (mainHolder.offsetHeight < mainHolder.scrollHeight) {
+    if (mainHolder.offsetHeightCached < mainHolder.scrollHeightCached) {
       scrollbarCompensation = getScrollbarWidth();
     }
     this.wot.wtViewport.columnsRenderCalculator.refreshStretching(this.wot.wtViewport.getViewportWidth() - scrollbarCompensation);

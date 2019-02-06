@@ -845,6 +845,17 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       instance.runHooks('afterChange', priv.firstRun[0], priv.firstRun[1]);
       priv.firstRun = false;
     }
+
+    this.view.wt.wtTable.hider.offsetWidthCached = this.view.wt.wtTable.hider.offsetWidth;
+    this.view.wt.wtTable.hider.offsetHeightCached = this.view.wt.wtTable.hider.offsetHeight;
+    this.view.wt.wtTable.hider.clientWidthCached = this.view.wt.wtTable.hider.clientWidth;
+    this.view.wt.wtTable.hider.clientHeightCached = this.view.wt.wtTable.hider.clientHeight;
+
+    this.view.wt.wtTable.holder.offsetWidthCached = this.view.wt.wtTable.holder.offsetWidth;
+    this.view.wt.wtTable.holder.offsetHeightCached = this.view.wt.wtTable.holder.offsetHeight;
+    this.view.wt.wtTable.holder.clientWidthCached = this.view.wt.wtTable.holder.clientWidth;
+    this.view.wt.wtTable.holder.clientHeightCached = this.view.wt.wtTable.holder.clientHeight;
+
     instance.runHooks('afterInit');
   };
 

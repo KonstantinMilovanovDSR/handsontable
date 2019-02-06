@@ -1437,6 +1437,11 @@ declare namespace Handsontable {
     colHeaders?: ((index?: number) => void) | boolean | any[];
     collapsibleColumns?: boolean | any[]; // pro
     columnHeaderHeight?: number | any[];
+    cacheCellSizes?: boolean;
+    rowsWithTopBorder?: number[];
+    columnsWithLeftBorder?: number[];
+    skipResettingOverlays?: boolean;
+    optimizeTableScroll?: boolean;
     columns?: ((index?: number) => void) | any[];
     columnSorting?: boolean | columnSorting.Settings;
     columnSummary?: object; // pro

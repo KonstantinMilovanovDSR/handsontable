@@ -153,7 +153,7 @@ class Overlays {
   /**
    * Refresh and redraw table
    */
-  refreshAll() {
+  refreshAll(afterScroll) {
     if (!this.wot.drawn) {
       return;
     }
@@ -163,7 +163,7 @@ class Overlays {
 
       return;
     }
-    this.wot.draw(true);
+    this.wot.draw(true, afterScroll);
 
     if (this.verticalScrolling) {
       this.leftOverlay.onScroll();
@@ -409,7 +409,7 @@ class Overlays {
       leftHolder.scrollTop = scrollTop;
     }
 
-    this.refreshAll();
+    this.refreshAll(true);
   }
 
   /**

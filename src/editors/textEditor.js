@@ -45,7 +45,7 @@ TextEditor.prototype.prepare = function(row, col, prop, td, originalValue, cellP
   BaseEditor.prototype.prepare.apply(this, [row, col, prop, td, originalValue, cellProperties, ...args]);
 
   if (!cellProperties.readOnly) {
-    this.refreshDimensions(true);
+    this.refreshDimensions(); // We do not force dimensions refreshing, it's performance impact
 
     const {
       allowInvalid,
@@ -179,7 +179,7 @@ const onBeforeKeyDown = function onBeforeKeyDown(event) {
 };
 
 TextEditor.prototype.open = function() {
-  this.refreshDimensions(); // need it instantly, to prevent https://github.com/handsontable/handsontable/issues/348
+  this.refreshDimensions(true); // need it instantly, to prevent https://github.com/handsontable/handsontable/issues/348
   this.showEditableElement();
 
   this.instance.addHook('beforeKeyDown', onBeforeKeyDown);

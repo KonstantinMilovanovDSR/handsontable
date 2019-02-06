@@ -98,6 +98,17 @@ class Event {
       if (this.instance.getSetting('stretchH') !== 'none') {
         this.instance.draw();
       }
+      this.instance.wtTable.tableOffset = 0;
+      this.instance.wtTable.holderOffset = 0;
+      this.instance.wtTable.hider.offsetWidthCached = this.instance.wtTable.hider.offsetWidth;
+      this.instance.wtTable.hider.offsetHeightCached = this.instance.wtTable.hider.offsetHeight;
+      this.instance.wtTable.hider.clientWidthCached = this.instance.wtTable.hider.clientWidth;
+      this.instance.wtTable.hider.clientHeightCached = this.instance.wtTable.hider.clientHeight;
+
+      this.instance.wtTable.holder.offsetWidthCached = this.instance.wtTable.holder.offsetWidth;
+      this.instance.wtTable.holder.offsetHeightCached = this.instance.wtTable.holder.offsetHeight;
+      this.instance.wtTable.holder.clientWidthCached = this.instance.wtTable.holder.clientWidth;
+      this.instance.wtTable.holder.clientHeightCached = this.instance.wtTable.holder.clientHeight;
     });
   }
 

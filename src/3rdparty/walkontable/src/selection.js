@@ -183,7 +183,7 @@ class Selection {
   /**
    * @param wotInstance
    */
-  draw(wotInstance) {
+  draw(wotInstance, fastDraw) {
     if (this.isEmpty()) {
       if (this.settings.border) {
         this.getBorder(wotInstance).disappear();
@@ -274,7 +274,7 @@ class Selection {
 
     if (this.settings.border) {
       // warning! border.appear modifies corners!
-      this.getBorder(wotInstance).appear(corners);
+      this.getBorder(wotInstance).appear(corners, fastDraw);
     }
   }
 }

@@ -530,7 +530,7 @@ class ManualRowMove extends BasePlugin {
       const leftPos = wtTable.holder.scrollLeft + this.hot.view.wt.wtViewport.getRowHeaderWidth();
 
       this.backlight.setPosition(null, leftPos);
-      this.backlight.setSize(wtTable.hider.offsetWidth - leftPos, this.getRowsHeight(start, end + 1));
+      this.backlight.setSize(wtTable.hider.offsetWidthCached - leftPos, this.getRowsHeight(start, end + 1));
       this.backlight.setOffset((this.getRowsHeight(start, coords.row) + event.layerY) * -1, null);
 
       addClass(this.hot.rootElement, CSS_ON_MOVING);
@@ -652,7 +652,7 @@ class ManualRowMove extends BasePlugin {
     const posLeft = headerWidth + scrollLeft;
 
     this.backlight.setPosition(null, posLeft);
-    this.backlight.setSize(wtTable.hider.offsetWidth - posLeft);
+    this.backlight.setSize(wtTable.hider.offsetWidthCached - posLeft);
   }
 
   /**
