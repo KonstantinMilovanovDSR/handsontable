@@ -65,7 +65,7 @@ class Border {
   registerListeners() {
     if (this.wot.getSetting('cacheCellSizes')) {
       this.sizeCache = {};
-      this.eventManager.addEventListener(document.body, 'resize', () => { this.sizeCache = {}; });
+      this.eventManager.addEventListener(window, 'resize', () => { this.sizeCache = {}; });
     }
     this.eventManager.addEventListener(document.body, 'mousedown', () => this.onMouseDown());
     this.eventManager.addEventListener(document.body, 'mouseup', () => this.onMouseUp());
