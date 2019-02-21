@@ -839,7 +839,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     this.forceFullRender = true; // used when data was changed
 
     instance.runHooks('init');
-    this.view.render();
+    this.view.render(true);
 
     if (typeof priv.firstRun === 'object') {
       instance.runHooks('afterChange', priv.firstRun[0], priv.firstRun[1]);

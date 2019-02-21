@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 6.2.2
- * Release date: 19/12/2018 (built at 20/02/2019 16:21:04)
+ * Release date: 19/12/2018 (built at 21/02/2019 16:25:56)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -12308,7 +12308,7 @@ function Core(rootElement, userSettings) {
     this.forceFullRender = true; // used when data was changed
 
     instance.runHooks('init');
-    this.view.render();
+    this.view.render(true);
 
     if (_typeof(priv.firstRun) === 'object') {
       instance.runHooks('afterChange', priv.firstRun[0], priv.firstRun[1]);
@@ -19512,13 +19512,14 @@ function () {
     value: function draw() {
       var fastDraw = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       var afterScroll = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var initDraw = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       this.drawInterrupted = false;
 
       if (!fastDraw && !(0, _element.isVisible)(this.wtTable.TABLE)) {
         // draw interrupted because TABLE is not visible
         this.drawInterrupted = true;
       } else {
-        this.wtTable.draw(fastDraw, afterScroll);
+        this.wtTable.draw(fastDraw, afterScroll, initDraw);
       }
 
       return this;
@@ -21554,7 +21555,7 @@ function () {
 
   }, {
     key: "draw",
-    value: function draw(fastDraw, afterScroll) {
+    value: function draw(fastDraw, afterScroll, initDraw) {
       var _this$wot = this.wot,
           wtOverlays = _this$wot.wtOverlays,
           wtViewport = _this$wot.wtViewport;
@@ -21625,7 +21626,7 @@ function () {
         this.columnFilter = new _column.default(startColumn, this.wot.getSetting('totalColumns'), rowHeaders);
         this.alignOverlaysWithTrimmingContainer();
 
-        this._doDraw(runFastDraw); // creates calculator after draw
+        this._doDraw(runFastDraw, initDraw); // creates calculator after draw
 
       }
 
@@ -21658,9 +21659,9 @@ function () {
     }
   }, {
     key: "_doDraw",
-    value: function _doDraw(runFastDraw) {
+    value: function _doDraw(runFastDraw, initDraw) {
       var wtRenderer = new _tableRenderer.default(this);
-      wtRenderer.render(runFastDraw);
+      wtRenderer.render(runFastDraw, initDraw);
     }
   }, {
     key: "removeClassFromCells",
@@ -22183,7 +22184,7 @@ function () {
 
   _createClass(TableRenderer, [{
     key: "render",
-    value: function render(fastDraw) {
+    value: function render(fastDraw, initDraw) {
       if (!this.wtTable.isWorkingOnClone()) {
         var skipRender = {};
         this.wot.getSetting('beforeDraw', true, skipRender);
@@ -22228,7 +22229,7 @@ function () {
         }
 
         if (!optimizeTableScroll || !fastDraw) {
-          this.adjustColumnWidths(columnsToRender);
+          this.adjustColumnWidths(columnsToRender, initDraw);
           this.markOversizedColumnHeaders();
           this.adjustColumnHeaderHeights();
         }
@@ -22253,7 +22254,7 @@ function () {
 
         if (hiderWidth !== 0 && tableWidth !== hiderWidth && (!optimizeTableScroll || !fastDraw)) {
           // Recalculate the column widths, if width changes made in the overlays removed the scrollbar, thus changing the viewport width.
-          this.adjustColumnWidths(columnsToRender);
+          this.adjustColumnWidths(columnsToRender, initDraw);
         }
 
         if (workspaceWidth !== this.wot.wtViewport.getWorkspaceWidth()) {
@@ -22549,14 +22550,26 @@ function () {
 
   }, {
     key: "adjustColumnWidths",
-    value: function adjustColumnWidths(columnsToRender) {
+    value: function adjustColumnWidths(columnsToRender, initDraw) {
       var scrollbarCompensation = 0;
       var sourceInstance = this.wot.cloneSource ? this.wot.cloneSource : this.wot;
       var mainHolder = sourceInstance.wtTable.holder;
+      var mainHider = sourceInstance.wtTable.hider;
       var defaultColumnWidth = this.wot.getSetting('defaultColumnWidth');
       var rowHeaderWidthSetting = this.wot.getSetting('rowHeaderWidth');
 
-      if (mainHolder.offsetHeightCached < mainHolder.scrollHeightCached) {
+      if (initDraw) {
+        mainHolder.offsetHeightCached = mainHolder.offsetHeight;
+        mainHolder.offsetWidthCached = mainHolder.offsetWidth;
+        mainHolder.clientWidthCached = mainHolder.clientWidth;
+        mainHolder.clientHeightCached = mainHolder.clientHeight;
+        mainHider.offsetHeightCached = mainHider.offsetHeight;
+        mainHider.offsetWidthCached = mainHider.offsetWidth;
+        mainHider.clientWidthCached = mainHider.clientWidth;
+        mainHider.clientHeightCached = mainHider.clientHeight;
+      }
+
+      if (mainHolder.offsetHeightCached < mainHolder.scrollHeight) {
         scrollbarCompensation = (0, _element.getScrollbarWidth)();
       }
 
@@ -29892,7 +29905,7 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "20/02/2019 16:21:04";
+Handsontable.buildDate = "21/02/2019 16:25:56";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "6.2.2";
 var baseVersion = "";
@@ -40859,8 +40872,8 @@ TableView.prototype.onDraw = function (force) {
   }
 };
 
-TableView.prototype.render = function () {
-  this.wt.draw(!this.instance.forceFullRender);
+TableView.prototype.render = function (initDraw) {
+  this.wt.draw(!this.instance.forceFullRender, false, initDraw);
   this.instance.forceFullRender = false;
   this.instance.renderCall = false;
 };
