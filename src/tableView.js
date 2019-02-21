@@ -494,8 +494,8 @@ TableView.prototype.onDraw = function(force) {
   }
 };
 
-TableView.prototype.render = function() {
-  this.wt.draw(!this.instance.forceFullRender);
+TableView.prototype.render = function(initDraw) {
+  this.wt.draw(!this.instance.forceFullRender, false, initDraw);
   this.instance.forceFullRender = false;
   this.instance.renderCall = false;
 };

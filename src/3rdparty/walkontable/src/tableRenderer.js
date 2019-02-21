@@ -45,7 +45,7 @@ class TableRenderer {
   /**
    *
    */
-  render(fastDraw) {
+  render(fastDraw, initDraw) {
     if (!this.wtTable.isWorkingOnClone()) {
       const skipRender = {};
       this.wot.getSetting('beforeDraw', true, skipRender);
@@ -95,7 +95,7 @@ class TableRenderer {
       }
 
       if (!optimizeTableScroll || !fastDraw) {
-        this.adjustColumnWidths(columnsToRender);
+        this.adjustColumnWidths(columnsToRender, initDraw);
         this.markOversizedColumnHeaders();
         this.adjustColumnHeaderHeights();
       }
@@ -121,7 +121,7 @@ class TableRenderer {
 
       if (hiderWidth !== 0 && (tableWidth !== hiderWidth) && (!optimizeTableScroll || !fastDraw)) {
         // Recalculate the column widths, if width changes made in the overlays removed the scrollbar, thus changing the viewport width.
-        this.adjustColumnWidths(columnsToRender);
+        this.adjustColumnWidths(columnsToRender, initDraw);
       }
 
       if (workspaceWidth !== this.wot.wtViewport.getWorkspaceWidth()) {
@@ -398,14 +398,27 @@ class TableRenderer {
   /**
    * @param {Number} columnsToRender Number of columns to render.
    */
-  adjustColumnWidths(columnsToRender) {
+  adjustColumnWidths(columnsToRender, initDraw) {
     let scrollbarCompensation = 0;
     const sourceInstance = this.wot.cloneSource ? this.wot.cloneSource : this.wot;
     const mainHolder = sourceInstance.wtTable.holder;
+    const mainHider = sourceInstance.wtTable.hider;
     const defaultColumnWidth = this.wot.getSetting('defaultColumnWidth');
     let rowHeaderWidthSetting = this.wot.getSetting('rowHeaderWidth');
 
-    if (mainHolder.offsetHeightCached < mainHolder.scrollHeightCached) {
+    if (initDraw) {
+      mainHolder.offsetHeightCached = mainHolder.offsetHeight;
+      mainHolder.offsetWidthCached = mainHolder.offsetWidth;
+      mainHolder.clientWidthCached = mainHolder.clientWidth;
+      mainHolder.clientHeightCached = mainHolder.clientHeight;
+
+      mainHider.offsetHeightCached = mainHider.offsetHeight;
+      mainHider.offsetWidthCached = mainHider.offsetWidth;
+      mainHider.clientWidthCached = mainHider.clientWidth;
+      mainHider.clientHeightCached = mainHider.clientHeight;
+    }
+
+    if (mainHolder.offsetHeightCached < mainHolder.scrollHeight) {
       scrollbarCompensation = getScrollbarWidth();
     }
     this.wot.wtViewport.columnsRenderCalculator.refreshStretching(this.wot.wtViewport.getViewportWidth() - scrollbarCompensation);
