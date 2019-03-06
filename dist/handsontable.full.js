@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 6.2.2
- * Release date: 19/12/2018 (built at 21/02/2019 16:25:56)
+ * Release date: 19/12/2018 (built at 06/03/2019 11:58:02)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -36924,9 +36924,17 @@ function () {
       var totalRows = this.wot.getSetting('totalRows');
       var headerRowSize = this.wot.wtViewport.getRowHeaderWidth();
       var headerColumnSize = this.wot.wtViewport.getColumnHeaderHeight();
+      var holderStyle = this.wot.wtTable.holder.style;
       var hiderStyle = this.wot.wtTable.hider.style;
-      hiderStyle.width = "".concat(headerRowSize + this.leftOverlay.sumCellSizes(0, totalColumns), "px");
+      var hiderWidth = headerRowSize + this.leftOverlay.sumCellSizes(0, totalColumns);
+      var holderWidth = parseFloat(holderStyle.width);
+      hiderStyle.width = "".concat(hiderWidth, "px");
       hiderStyle.height = "".concat(headerColumnSize + this.topOverlay.sumCellSizes(0, totalRows) + 1, "px");
+
+      if (holderWidth && holderWidth !== hiderWidth && Math.abs(holderWidth - hiderWidth) < 1) {
+        holderStyle.width = "".concat(hiderWidth, "px");
+      }
+
       this.topOverlay.adjustElementsSize(force);
       this.leftOverlay.adjustElementsSize(force);
 
@@ -37735,7 +37743,14 @@ function () {
             this.wtRootElement.style.overflow = 'visible';
           }
         } else {
-          this.holder.style.width = (0, _element.getStyle)(trimmingElement, 'width');
+          var holderWidth = parseFloat((0, _element.getStyle)(trimmingElement, 'width'));
+          var hiderWidth = parseFloat(this.hider.style.width);
+
+          if (hiderWidth && hiderWidth !== holderWidth && Math.abs(hiderWidth - holderWidth) < 1) {
+            holderWidth = hiderWidth;
+          }
+
+          this.holder.style.width = "".concat(holderWidth, "px");
           this.holder.style.height = (0, _element.getStyle)(trimmingElement, 'height');
           this.holder.style.overflow = '';
         }
@@ -46116,7 +46131,7 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "21/02/2019 16:25:56";
+Handsontable.buildDate = "06/03/2019 11:58:02";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "6.2.2";
 var baseVersion = "";
