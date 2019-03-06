@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 6.2.2
- * Release date: 19/12/2018 (built at 06/03/2019 11:42:45)
+ * Release date: 19/12/2018 (built at 06/03/2019 11:58:02)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -21543,14 +21543,14 @@ function () {
             this.wtRootElement.style.overflow = 'visible';
           }
         } else {
-          var trimmingElementWidth = parseFloat((0, _element.getStyle)(trimmingElement, 'width'));
+          var holderWidth = parseFloat((0, _element.getStyle)(trimmingElement, 'width'));
           var hiderWidth = parseFloat(this.hider.style.width);
 
-          if (hiderWidth && hiderWidth !== trimmingElementWidth && Math.abs(hiderWidth - trimmingElementWidth) < 1) {
-            trimmingElementWidth = hiderWidth;
+          if (hiderWidth && hiderWidth !== holderWidth && Math.abs(hiderWidth - holderWidth) < 1) {
+            holderWidth = hiderWidth;
           }
 
-          this.holder.style.width = "".concat(trimmingElementWidth, "px");
+          this.holder.style.width = "".concat(holderWidth, "px");
           this.holder.style.height = (0, _element.getStyle)(trimmingElement, 'height');
           this.holder.style.overflow = '';
         }
@@ -29920,7 +29920,7 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "06/03/2019 11:42:45";
+Handsontable.buildDate = "06/03/2019 11:58:02";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "6.2.2";
 var baseVersion = "";
