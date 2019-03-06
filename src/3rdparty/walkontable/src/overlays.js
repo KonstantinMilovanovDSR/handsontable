@@ -520,10 +520,17 @@ class Overlays {
     const totalRows = this.wot.getSetting('totalRows');
     const headerRowSize = this.wot.wtViewport.getRowHeaderWidth();
     const headerColumnSize = this.wot.wtViewport.getColumnHeaderHeight();
+    const holderStyle = this.wot.wtTable.holder.style;
     const hiderStyle = this.wot.wtTable.hider.style;
+    const hiderWidth = headerRowSize + this.leftOverlay.sumCellSizes(0, totalColumns);
+    const holderWidth = parseFloat(holderStyle.width);
 
-    hiderStyle.width = `${headerRowSize + this.leftOverlay.sumCellSizes(0, totalColumns)}px`;
+    hiderStyle.width = `${hiderWidth}px`;
     hiderStyle.height = `${headerColumnSize + this.topOverlay.sumCellSizes(0, totalRows) + 1}px`;
+
+    if (holderWidth && holderWidth !== hiderWidth && Math.abs(holderWidth - hiderWidth) < 1) {
+      holderStyle.width = `${hiderWidth}px`;
+    }
 
     this.topOverlay.adjustElementsSize(force);
     this.leftOverlay.adjustElementsSize(force);

@@ -174,7 +174,13 @@ class Table {
           this.wtRootElement.style.overflow = 'visible';
         }
       } else {
-        this.holder.style.width = getStyle(trimmingElement, 'width');
+        let trimmingElementWidth = parseFloat(getStyle(trimmingElement, 'width'));
+        const hiderWidth = parseFloat(this.hider.style.width);
+
+        if (hiderWidth && hiderWidth !== trimmingElementWidth && Math.abs(hiderWidth - trimmingElementWidth) < 1) {
+          trimmingElementWidth = hiderWidth;
+        }
+        this.holder.style.width = `${trimmingElementWidth}px`;
         this.holder.style.height = getStyle(trimmingElement, 'height');
         this.holder.style.overflow = '';
       }
