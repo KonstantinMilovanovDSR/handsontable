@@ -2388,6 +2388,14 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       const settings = cellProperties.cells.call(cellProperties, physicalRow, physicalColumn, prop);
 
       if (settings) {
+        if (cellProperties.editor !== settings.editor) {
+          const currentSelection = this.selection && this.selection.selectedRange && this.selection.selectedRange.current();
+          const highlight = currentSelection ? currentSelection.highlight : null;
+
+          if (highlight && highlight.row === row && highlight.col === column) {
+            this._registerTimeout(() => this.prepareEditor(), 0);
+          }
+        }
         extend(cellProperties, settings);
         extend(cellProperties, expandType(settings)); // for `type` added in cells
       }
@@ -3393,6 +3401,10 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    */
   this.getActiveEditor = function() {
     return editorManager.getActiveEditor();
+  };
+
+  this.prepareEditor = function() {
+    editorManager.prepareEditor();
   };
 
   /**
