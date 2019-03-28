@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 6.2.2
- * Release date: 19/12/2018 (built at 06/03/2019 11:58:02)
+ * Release date: 19/12/2018 (built at 27/03/2019 18:55:54)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -13925,6 +13925,8 @@ function Core(rootElement, userSettings) {
 
 
   this.getCellMeta = function (row, column) {
+    var _this5 = this;
+
     var prop = datamap.colToProp(column);
 
     var _recordTranslator$toP5 = recordTranslator.toPhysical(row, column),
@@ -13965,6 +13967,17 @@ function Core(rootElement, userSettings) {
       var settings = cellProperties.cells.call(cellProperties, physicalRow, physicalColumn, prop);
 
       if (settings) {
+        if (cellProperties.editor !== settings.editor) {
+          var currentSelection = this.selection && this.selection.selectedRange && this.selection.selectedRange.current();
+          var highlight = currentSelection ? currentSelection.highlight : null;
+
+          if (highlight && highlight.row === row && highlight.col === column) {
+            this._registerTimeout(function () {
+              return _this5.prepareEditor();
+            }, 0);
+          }
+        }
+
         (0, _object.extend)(cellProperties, settings);
         (0, _object.extend)(cellProperties, expandType(settings)); // for `type` added in cells
       }
@@ -15025,6 +15038,10 @@ function Core(rootElement, userSettings) {
 
   this.getActiveEditor = function () {
     return editorManager.getActiveEditor();
+  };
+
+  this.prepareEditor = function () {
+    editorManager.prepareEditor();
   };
   /**
    * Returns plugin instance by provided its name.
@@ -29920,7 +29937,7 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "06/03/2019 11:58:02";
+Handsontable.buildDate = "27/03/2019 18:55:54";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "6.2.2";
 var baseVersion = "";
