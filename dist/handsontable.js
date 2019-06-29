@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 6.2.2
- * Release date: 19/12/2018 (built at 27/03/2019 18:55:54)
+ * Release date: 19/12/2018 (built at 29/06/2019 18:58:56)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -20744,12 +20744,16 @@ function () {
       var holderStyle = this.wot.wtTable.holder.style;
       var hiderStyle = this.wot.wtTable.hider.style;
       var hiderWidth = headerRowSize + this.leftOverlay.sumCellSizes(0, totalColumns);
-      var holderWidth = parseFloat(holderStyle.width);
+      var holderWidth = holderStyle.width;
       hiderStyle.width = "".concat(hiderWidth, "px");
       hiderStyle.height = "".concat(headerColumnSize + this.topOverlay.sumCellSizes(0, totalRows) + 1, "px");
 
-      if (holderWidth && holderWidth !== hiderWidth && Math.abs(holderWidth - hiderWidth) < 1) {
-        holderStyle.width = "".concat(hiderWidth, "px");
+      if (holderWidth && holderWidth.length >= 3 && holderWidth.endsWith('px')) {
+        holderWidth = parseFloat(holderWidth);
+
+        if (holderWidth !== hiderWidth && Math.abs(holderWidth - hiderWidth) < 1) {
+          holderStyle.width = "".concat(hiderWidth, "px");
+        }
       }
 
       this.topOverlay.adjustElementsSize(force);
@@ -21560,14 +21564,22 @@ function () {
             this.wtRootElement.style.overflow = 'visible';
           }
         } else {
-          var holderWidth = parseFloat((0, _element.getStyle)(trimmingElement, 'width'));
-          var hiderWidth = parseFloat(this.hider.style.width);
+          var holderWidth = (0, _element.getStyle)(trimmingElement, 'width');
+          var hiderWidth = this.hider.style.width;
 
-          if (hiderWidth && hiderWidth !== holderWidth && Math.abs(hiderWidth - holderWidth) < 1) {
-            holderWidth = hiderWidth;
+          if (holderWidth && holderWidth.length >= 3 && holderWidth.endsWith('px') && hiderWidth && hiderWidth.length >= 3 && hiderWidth.endsWith('px')) {
+            holderWidth = parseFloat(holderWidth);
+            hiderWidth = parseFloat(hiderWidth);
+
+            if (hiderWidth && hiderWidth !== holderWidth && Math.abs(hiderWidth - holderWidth) < 1) {
+              holderWidth = hiderWidth;
+            }
+
+            holderWidth = "".concat(holderWidth, "px");
+            hiderWidth = "".concat(hiderWidth, "px");
           }
 
-          this.holder.style.width = "".concat(holderWidth, "px");
+          this.holder.style.width = holderWidth;
           this.holder.style.height = (0, _element.getStyle)(trimmingElement, 'height');
           this.holder.style.overflow = '';
         }
@@ -29937,7 +29949,7 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "27/03/2019 18:55:54";
+Handsontable.buildDate = "29/06/2019 18:58:56";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "6.2.2";
 var baseVersion = "";
