@@ -10,6 +10,7 @@ import {
   closest
 } from './../../../helpers/dom/element';
 import { isFunction } from './../../../helpers/function';
+import { isPixelValue } from './../../../helpers/string';
 import CellCoords from './cell/coords';
 import ColumnFilter from './filter/column';
 import RowFilter from './filter/row';
@@ -177,8 +178,7 @@ class Table {
         let holderWidth = getStyle(trimmingElement, 'width');
         let hiderWidth = this.hider.style.width;
 
-        if (holderWidth && holderWidth.length >= 3 && holderWidth.endsWith('px') &&
-             hiderWidth && hiderWidth.length >= 3 && hiderWidth.endsWith('px')) {
+        if (isPixelValue(holderWidth) && isPixelValue(hiderWidth)) {
           holderWidth = parseFloat(holderWidth);
           hiderWidth = parseFloat(hiderWidth);
 
