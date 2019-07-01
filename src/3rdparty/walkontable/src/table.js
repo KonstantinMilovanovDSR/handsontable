@@ -10,6 +10,7 @@ import {
   closest
 } from './../../../helpers/dom/element';
 import { isFunction } from './../../../helpers/function';
+import { isPixelValue } from './../../../helpers/string';
 import CellCoords from './cell/coords';
 import ColumnFilter from './filter/column';
 import RowFilter from './filter/row';
@@ -174,13 +175,20 @@ class Table {
           this.wtRootElement.style.overflow = 'visible';
         }
       } else {
-        let holderWidth = parseFloat(getStyle(trimmingElement, 'width'));
-        const hiderWidth = parseFloat(this.hider.style.width);
+        let holderWidth = getStyle(trimmingElement, 'width');
+        let hiderWidth = this.hider.style.width;
 
-        if (hiderWidth && hiderWidth !== holderWidth && Math.abs(hiderWidth - holderWidth) < 1) {
-          holderWidth = hiderWidth;
+        if (isPixelValue(holderWidth) && isPixelValue(hiderWidth)) {
+          holderWidth = parseFloat(holderWidth);
+          hiderWidth = parseFloat(hiderWidth);
+
+          if (hiderWidth && hiderWidth !== holderWidth && Math.abs(hiderWidth - holderWidth) < 1) {
+            holderWidth = hiderWidth;
+          }
+          holderWidth = `${holderWidth}px`;
+          hiderWidth = `${hiderWidth}px`;
         }
-        this.holder.style.width = `${holderWidth}px`;
+        this.holder.style.width = holderWidth;
         this.holder.style.height = getStyle(trimmingElement, 'height');
         this.holder.style.overflow = '';
       }

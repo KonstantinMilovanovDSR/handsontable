@@ -5,6 +5,7 @@ import {
 import { arrayEach } from './../../../helpers/array';
 import { isKey } from './../../../helpers/unicode';
 import { isChrome } from './../../../helpers/browser';
+import { isPixelValue } from './../../../helpers/string';
 import EventManager from './../../../eventManager';
 import Overlay from './overlay/_base';
 
@@ -523,13 +524,16 @@ class Overlays {
     const holderStyle = this.wot.wtTable.holder.style;
     const hiderStyle = this.wot.wtTable.hider.style;
     const hiderWidth = headerRowSize + this.leftOverlay.sumCellSizes(0, totalColumns);
-    const holderWidth = parseFloat(holderStyle.width);
+    let holderWidth = holderStyle.width;
 
     hiderStyle.width = `${hiderWidth}px`;
     hiderStyle.height = `${headerColumnSize + this.topOverlay.sumCellSizes(0, totalRows) + 1}px`;
 
-    if (holderWidth && holderWidth !== hiderWidth && Math.abs(holderWidth - hiderWidth) < 1) {
-      holderStyle.width = `${hiderWidth}px`;
+    if (isPixelValue(holderWidth)) {
+      holderWidth = parseFloat(holderWidth);
+      if (holderWidth !== hiderWidth && Math.abs(holderWidth - hiderWidth) < 1) {
+        holderStyle.width = `${hiderWidth}px`;
+      }
     }
 
     this.topOverlay.adjustElementsSize(force);

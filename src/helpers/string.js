@@ -58,6 +58,16 @@ export function isPercentValue(value) {
 }
 
 /**
+ * Checks if style value is in pixels.
+ *
+ * @param {String} value
+ * @returns {Boolean}
+ */
+export function isPixelValue(value) {
+  return value && value.length >= 3 && value.endsWith('px');
+}
+
+/**
  * Substitute strings placed beetwen square brackets into value defined in `variables` object. String names defined in
  * square brackets must be the same as property name of `variables` object.
  *
