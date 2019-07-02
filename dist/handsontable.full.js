@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 6.2.2
- * Release date: 19/12/2018 (built at 01/07/2019 15:25:02)
+ * Release date: 19/12/2018 (built at 02/07/2019 17:04:47)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -40725,6 +40725,10 @@ function () {
   }, {
     key: "onMouseDown",
     value: function onMouseDown(event) {
+      if (this.instance.getSetting('hideBorderOnMouseDownOver') === 'force') {
+        return;
+      }
+
       var priv = privatePool.get(this);
       var activeElement = document.activeElement;
       var getParentNode = (0, _function.partial)(_element.getParent, event.realTarget);
@@ -59546,6 +59550,7 @@ DefaultSettings.prototype = {
    * If set to `true`, it enables the browser's native selection of a fragment of the text within a single cell, between
    * adjacent cells or in a whole table. If set to `'cell'`, it enables the possibility of selecting a fragment of the
    * text within a single cell's body.
+   * If set to `force`, browser selection is forced to be enabled.
    *
    * @type {Boolean|String}
    * @default false
@@ -62690,7 +62695,7 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "01/07/2019 15:25:02";
+Handsontable.buildDate = "02/07/2019 17:04:47";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "6.2.2";
 var baseVersion = "";
@@ -75317,7 +75322,7 @@ function TableView(instance) {
 }
 
 TableView.prototype.isTextSelectionAllowed = function (el) {
-  if ((0, _element.isInput)(el)) {
+  if ((0, _element.isInput)(el) || this.settings.fragmentSelection === 'force') {
     return true;
   }
 

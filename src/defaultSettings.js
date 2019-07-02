@@ -1267,6 +1267,7 @@ DefaultSettings.prototype = {
    * If set to `true`, it enables the browser's native selection of a fragment of the text within a single cell, between
    * adjacent cells or in a whole table. If set to `'cell'`, it enables the possibility of selecting a fragment of the
    * text within a single cell's body.
+   * If set to `force`, browser selection is forced to be enabled.
    *
    * @type {Boolean|String}
    * @default false

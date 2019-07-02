@@ -171,6 +171,9 @@ class Event {
    * @param {MouseEvent} event
    */
   onMouseDown(event) {
+    if (this.instance.getSetting('hideBorderOnMouseDownOver') === 'force') {
+      return;
+    }
     const priv = privatePool.get(this);
     const activeElement = document.activeElement;
     const getParentNode = partial(getParent, event.realTarget);
