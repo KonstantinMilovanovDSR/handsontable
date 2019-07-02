@@ -445,7 +445,7 @@ function TableView(instance) {
 }
 
 TableView.prototype.isTextSelectionAllowed = function(el) {
-  if (isInput(el)) {
+  if (isInput(el) || this.settings.fragmentSelection === 'force') {
     return true;
   }
   const isChildOfTableBody = isChildOf(el, this.instance.view.wt.wtTable.spreader);
