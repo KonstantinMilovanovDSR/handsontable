@@ -1,7 +1,10 @@
 import {
   getScrollableElement,
-  getScrollbarWidth,
+  getScrollbarWidth
 } from './../../../helpers/dom/element';
+import {
+  areEventListenerOptionsSupported
+} from './../../../helpers/dom/event';
 import { arrayEach } from './../../../helpers/array';
 import { isKey } from './../../../helpers/unicode';
 import { isChrome } from './../../../helpers/browser';
@@ -186,6 +189,7 @@ class Overlays {
     const leftOverlayScrollable = this.leftOverlay.mainTableScrollableElement;
 
     const listenersToRegister = [];
+    const eventListenerOptionsSupported = areEventListenerOptionsSupported();
     listenersToRegister.push([document.documentElement, 'keydown', event => this.onKeyDown(event)]);
     listenersToRegister.push([document.documentElement, 'keyup', () => this.onKeyUp()]);
     listenersToRegister.push([document, 'visibilitychange', () => this.onKeyUp()]);
@@ -253,12 +257,12 @@ class Overlays {
 
           event.preventDefault();
         }
-      }]);
+      }, eventListenerOptionsSupported ? { passive: false } : undefined]);
     }
 
     while (listenersToRegister.length) {
       const listener = listenersToRegister.pop();
-      this.eventManager.addEventListener(listener[0], listener[1], listener[2]);
+      this.eventManager.addEventListener(listener[0], listener[1], listener[2], listener[3]);
 
       this.registeredListeners.push(listener);
     }

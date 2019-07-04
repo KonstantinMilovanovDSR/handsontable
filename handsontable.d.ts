@@ -1934,6 +1934,7 @@ declare namespace Handsontable {
     setOverlayPosition: (overlayElem: HTMLElement, left: number, top: number) => void;
     stopImmediatePropagation: (event: Event) => void;
     stopPropagation: (event: Event) => void;
+    areEventListenerOptionsSupported: () => boolean;
   }
 
   interface Plugins {

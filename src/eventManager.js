@@ -35,9 +35,10 @@ class EventManager {
    * @param {Element} element Target element.
    * @param {String} eventName Event name.
    * @param {Function} callback Function which will be called after event occur.
+   * @param {Object} options Event listener options.
    * @returns {Function} Returns function which you can easily call to remove that event
    */
-  addEventListener(element, eventName, callback) {
+  addEventListener(element, eventName, callback, options) {
     const context = this.context;
 
     function callbackProxy(event) {
@@ -51,7 +52,7 @@ class EventManager {
       callbackProxy,
     });
 
-    element.addEventListener(eventName, callbackProxy, false);
+    element.addEventListener(eventName, callbackProxy, options || false);
     listenersCounter += 1;
 
     return () => {
