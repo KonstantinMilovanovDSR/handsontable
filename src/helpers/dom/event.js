@@ -82,3 +82,29 @@ export function isRightClick(event) {
 export function isLeftClick(event) {
   return event.button === 0;
 }
+
+let supportsPassive;
+
+/**
+ * Checks if passive listeners are supported by the browser.
+ */
+export function areEventListenerOptionsSupported() {
+  // taken from https://github.com/WICG/EventListenerOptions/blob/gh-pages/explainer.md#feature-detection
+  if (supportsPassive !== void 0) {
+    return supportsPassive;
+  }
+  supportsPassive = false;
+  try {
+    const opts = Object.defineProperty({}, 'passive', {
+      get: () => {
+        supportsPassive = true;
+      }
+    });
+    window.addEventListener('testPassive', null, opts);
+    window.removeEventListener('testPassive', null, opts);
+  } catch (e) {
+    // just ignore the error
+  }
+
+  return supportsPassive;
+}
