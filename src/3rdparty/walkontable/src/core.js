@@ -40,7 +40,7 @@ class Walkontable {
       this.wtSettings = new Settings(this, settings);
       this.wtTable = new Table(this, settings.table);
       this.wtScroll = new Scroll(this);
-      this.wtViewport = new Viewport(this);
+      this.wtViewport = new Viewport(this, settings);
       this.wtEvent = new Event(this);
       this.selections = this.getSetting('selections');
       this.wtOverlays = new Overlays(this);

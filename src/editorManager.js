@@ -225,13 +225,13 @@ function EditorManager(instance, priv, selection) {
         break;
 
       case KEY_CODES.PAGE_UP:
-        selection.transformStart(-instance.countVisibleRows(), 0);
+        selection.transformStart(-instance.countVisibleRowsUp(), 0);
         event.preventDefault(); // don't page up the window
         stopPropagation(event);
         break;
 
       case KEY_CODES.PAGE_DOWN:
-        selection.transformStart(instance.countVisibleRows(), 0);
+        selection.transformStart(instance.countVisibleRowsDown(), 0);
         event.preventDefault(); // don't page down the window
         stopPropagation(event);
         break;

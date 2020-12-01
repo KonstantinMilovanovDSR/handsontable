@@ -106,7 +106,7 @@ class TableRenderer {
     }
     this.removeRedundantRows(rowsToRender);
 
-    if ((!optimizeTableScroll || !fastDraw) && 
+    if ((!optimizeTableScroll || !fastDraw) &&
       (!this.wtTable.isWorkingOnClone() || this.wot.isOverlayName(Overlay.CLONE_BOTTOM))) {
       this.markOversizedRows();
     }

@@ -3006,6 +3006,14 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     return instance.view.wt.drawn ? instance.view.wt.wtTable.getVisibleRowsCount() : -1;
   };
 
+  this.countVisibleRowsDown = function() {
+    return instance.view.wt.drawn ? instance.view.wt.wtTable.getVisibleRowsCountDown() : -1;
+  };
+
+  this.countVisibleRowsUp = function() {
+    return instance.view.wt.drawn ? instance.view.wt.wtTable.getVisibleRowsCountUp() : -1;
+  };
+
   /**
    * Returns the number of rendered columns (including columns partially or fully rendered outside viewport).
    *
