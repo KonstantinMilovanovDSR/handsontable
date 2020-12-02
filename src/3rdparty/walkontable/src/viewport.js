@@ -17,10 +17,11 @@ class Viewport {
   /**
    * @param wotInstance
    */
-  constructor(wotInstance) {
+  constructor(wotInstance, settings) {
     this.wot = wotInstance;
     // legacy support
     this.instance = this.wot;
+    this.settings = settings;
 
     this.oversizedRows = [];
     this.oversizedColumnHeaders = [];
@@ -347,7 +348,9 @@ class Viewport {
       sourceRow => this.wot.wtTable.getRowHeight(sourceRow),
       visible ? null : this.wot.wtSettings.settings.viewportRowCalculatorOverride,
       visible,
-      scrollbarHeight
+      scrollbarHeight,
+      this.instance.selections ? this.instance.selections.cell : null,
+      this.settings
     );
   }
 

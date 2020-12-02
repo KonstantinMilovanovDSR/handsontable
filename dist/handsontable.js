@@ -23,8 +23,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
- * Version: 6.2.2
- * Release date: 19/12/2018 (built at 04/07/2019 18:05:13)
+ * Version: 6.2.9
+ * Release date: 19/12/2018 (built at 02/12/2020 09:54:32)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -14653,6 +14653,14 @@ function Core(rootElement, userSettings) {
   this.countVisibleRows = function () {
     return instance.view.wt.drawn ? instance.view.wt.wtTable.getVisibleRowsCount() : -1;
   };
+
+  this.countVisibleRowsDown = function () {
+    return instance.view.wt.drawn ? instance.view.wt.wtTable.getVisibleRowsCountDown() : -1;
+  };
+
+  this.countVisibleRowsUp = function () {
+    return instance.view.wt.drawn ? instance.view.wt.wtTable.getVisibleRowsCountUp() : -1;
+  };
   /**
    * Returns the number of rendered columns (including columns partially or fully rendered outside viewport).
    *
@@ -18393,7 +18401,7 @@ function () {
 
   }]);
 
-  function ViewportRowsCalculator(viewportHeight, scrollOffset, totalRows, rowHeightFn, overrideFn, onlyFullyVisible, horizontalScrollbarHeight) {
+  function ViewportRowsCalculator(viewportHeight, scrollOffset, totalRows, rowHeightFn, overrideFn, onlyFullyVisible, horizontalScrollbarHeight, selection, settings) {
     _classCallCheck(this, ViewportRowsCalculator);
 
     privatePool.set(this, {
@@ -18403,7 +18411,9 @@ function () {
       rowHeightFn: rowHeightFn,
       overrideFn: overrideFn,
       onlyFullyVisible: onlyFullyVisible,
-      horizontalScrollbarHeight: horizontalScrollbarHeight
+      horizontalScrollbarHeight: horizontalScrollbarHeight,
+      selection: selection,
+      settings: settings
     });
     /**
      * Number of rendered/visible rows
@@ -18433,6 +18443,8 @@ function () {
      */
 
     this.startPosition = null;
+    this.countDown = 0;
+    this.countUp = 0;
     this.calculate();
   }
   /**
@@ -18454,6 +18466,8 @@ function () {
       var totalRows = priv.totalRows;
       var viewportHeight = priv.viewportHeight;
       var horizontalScrollbarHeight = priv.horizontalScrollbarHeight || 0;
+      var selection = priv.selection;
+      var settings = priv.settings;
       var rowHeight; // Calculate the number (start and end index) of rows needed
 
       for (var i = 0; i < totalRows; i++) {
@@ -18520,6 +18534,24 @@ function () {
 
       if (this.startRow !== null) {
         this.count = this.endRow - this.startRow + 1;
+        this.countDown = this.count;
+        this.countUp = this.count;
+
+        if (selection && selection.cellRange) {
+          var cellMeta = settings.getCellMeta(selection.cellRange.to.row, selection.cellRange.to.col);
+          var rowSpanned = cellMeta.rowSpanned ? cellMeta.rowSpanned - 1 : 0;
+          var lastRow = selection.cellRange.to.row + rowSpanned;
+
+          if (lastRow !== totalRows - 1 && lastRow + this.count >= totalRows) {
+            this.countDown = totalRows - lastRow - 1;
+          }
+
+          var firstRow = selection.cellRange.from.row;
+
+          if (firstRow !== 0 && firstRow - this.count < 0) {
+            this.countUp = firstRow;
+          }
+        }
       }
     }
   }]);
@@ -19532,7 +19564,7 @@ function () {
       this.wtSettings = new _settings.default(this, settings);
       this.wtTable = new _table.default(this, settings.table);
       this.wtScroll = new _scroll.default(this);
-      this.wtViewport = new _viewport.default(this);
+      this.wtViewport = new _viewport.default(this, settings);
       this.wtEvent = new _event.default(this);
       this.selections = this.getSetting('selections');
       this.wtOverlays = new _overlays.default(this);
@@ -22082,6 +22114,16 @@ function () {
       return this.wot.wtViewport.rowsVisibleCalculator.count;
     }
   }, {
+    key: "getVisibleRowsCountDown",
+    value: function getVisibleRowsCountDown() {
+      return this.wot.wtViewport.rowsVisibleCalculator.countDown;
+    }
+  }, {
+    key: "getVisibleRowsCountUp",
+    value: function getVisibleRowsCountUp() {
+      return this.wot.wtViewport.rowsVisibleCalculator.countUp;
+    }
+  }, {
     key: "allRowsInViewport",
     value: function allRowsInViewport() {
       return this.wot.getSetting('totalRows') === this.getVisibleRowsCount();
@@ -22991,7 +23033,7 @@ function () {
   /**
    * @param wotInstance
    */
-  function Viewport(wotInstance) {
+  function Viewport(wotInstance, settings) {
     var _this = this;
 
     _classCallCheck(this, Viewport);
@@ -22999,6 +23041,7 @@ function () {
     this.wot = wotInstance; // legacy support
 
     this.instance = this.wot;
+    this.settings = settings;
     this.oversizedRows = [];
     this.oversizedColumnHeaders = [];
     this.hasOversizedColumnHeadersMarked = {};
@@ -23339,7 +23382,7 @@ function () {
 
       return new _viewportRows.default(height, pos, this.wot.getSetting('totalRows'), function (sourceRow) {
         return _this2.wot.wtTable.getRowHeight(sourceRow);
-      }, visible ? null : this.wot.wtSettings.settings.viewportRowCalculatorOverride, visible, scrollbarHeight);
+      }, visible ? null : this.wot.wtSettings.settings.viewportRowCalculatorOverride, visible, scrollbarHeight, this.instance.selections ? this.instance.selections.cell : null, this.settings);
     }
     /**
      * Creates:
@@ -30004,9 +30047,9 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "04/07/2019 18:05:13";
-Handsontable.packageName = "handsontable";
-Handsontable.version = "6.2.2";
+Handsontable.buildDate = "02/12/2020 09:54:32";
+Handsontable.packageName = "handsontable-labworks";
+Handsontable.version = "6.2.9";
 var baseVersion = "";
 
 if (baseVersion) {
@@ -39976,7 +40019,10 @@ function EditorManager(instance, priv, selection) {
     if (shiftKey) {
       selection.transformEnd(-1, 0);
     } else {
-      selection.transformStart(-1, 0);
+      var highlight = selection.selectedRange.current().highlight;
+      var cellMeta = instance.getCellMeta(highlight.row, highlight.col);
+      var rowSpanned = cellMeta.rowSpanned ? cellMeta.rowSpanned : 1;
+      selection.transformStart(-rowSpanned, 0);
     }
   }
 
@@ -39985,7 +40031,10 @@ function EditorManager(instance, priv, selection) {
       // expanding selection down with shift
       selection.transformEnd(1, 0);
     } else {
-      selection.transformStart(1, 0);
+      var highlight = selection.selectedRange.current().highlight;
+      var cellMeta = instance.getCellMeta(highlight.row, highlight.col);
+      var rowSpanned = cellMeta.rowSpanned ? cellMeta.rowSpanned : 1;
+      selection.transformStart(rowSpanned, 0);
     }
   }
 
@@ -40186,14 +40235,14 @@ function EditorManager(instance, priv, selection) {
         break;
 
       case _unicode.KEY_CODES.PAGE_UP:
-        selection.transformStart(-instance.countVisibleRows(), 0);
+        selection.transformStart(-instance.countVisibleRowsUp(), 0);
         event.preventDefault(); // don't page up the window
 
         (0, _event.stopPropagation)(event);
         break;
 
       case _unicode.KEY_CODES.PAGE_DOWN:
-        selection.transformStart(instance.countVisibleRows(), 0);
+        selection.transformStart(instance.countVisibleRowsDown(), 0);
         event.preventDefault(); // don't page down the window
 
         (0, _event.stopPropagation)(event);
@@ -40634,6 +40683,7 @@ function TableView(instance) {
       return that.settings.stretchH;
     },
     data: instance.getDataAtCell,
+    getCellMeta: instance.getCellMeta,
     totalRows: function totalRows() {
       return instance.countRows();
     },
@@ -58939,6 +58989,8 @@ function (_BasePlugin) {
         });
       });
       this.hot.setCellMeta(mergeParent.row, mergeParent.col, 'spanned', true);
+      this.hot.setCellMeta(mergeParent.row, mergeParent.col, 'rowSpanned', mergeParent.rowspan);
+      this.hot.setCellMeta(mergeParent.row, mergeParent.col, 'colSpanned', mergeParent.colspan);
       var mergedCellAdded = this.mergedCellsCollection.add(mergeParent);
 
       if (mergedCellAdded) {
@@ -58988,6 +59040,10 @@ function (_BasePlugin) {
         });
 
         _this5.hot.removeCellMeta(currentCollection.row, currentCollection.col, 'spanned');
+
+        _this5.hot.removeCellMeta(currentCollection.row, currentCollection.col, 'rowSpanned');
+
+        _this5.hot.removeCellMeta(currentCollection.row, currentCollection.col, 'colSpanned');
       });
       this.hot.render();
       this.hot.runHooks('afterUnmergeCells', cellRange, auto);

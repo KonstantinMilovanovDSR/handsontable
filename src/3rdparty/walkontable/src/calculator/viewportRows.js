@@ -25,7 +25,7 @@ class ViewportRowsCalculator {
    * @param {Boolean} onlyFullyVisible if `true`, only startRow and endRow will be indexes of rows that are fully in viewport
    * @param {Number} horizontalScrollbarHeight
    */
-  constructor(viewportHeight, scrollOffset, totalRows, rowHeightFn, overrideFn, onlyFullyVisible, horizontalScrollbarHeight) {
+  constructor(viewportHeight, scrollOffset, totalRows, rowHeightFn, overrideFn, onlyFullyVisible, horizontalScrollbarHeight, selection, settings) {
     privatePool.set(this, {
       viewportHeight,
       scrollOffset,
@@ -33,7 +33,9 @@ class ViewportRowsCalculator {
       rowHeightFn,
       overrideFn,
       onlyFullyVisible,
-      horizontalScrollbarHeight
+      horizontalScrollbarHeight,
+      selection,
+      settings
     });
 
     /**
@@ -64,6 +66,10 @@ class ViewportRowsCalculator {
      */
     this.startPosition = null;
 
+    this.countDown = 0;
+
+    this.countUp = 0;
+
     this.calculate();
   }
 
@@ -83,6 +89,9 @@ class ViewportRowsCalculator {
     const totalRows = priv.totalRows;
     const viewportHeight = priv.viewportHeight;
     const horizontalScrollbarHeight = priv.horizontalScrollbarHeight || 0;
+    const selection = priv.selection;
+    const settings = priv.settings;
+
     let rowHeight;
 
     // Calculate the number (start and end index) of rows needed
@@ -143,6 +152,22 @@ class ViewportRowsCalculator {
     }
     if (this.startRow !== null) {
       this.count = this.endRow - this.startRow + 1;
+
+      this.countDown = this.count;
+      this.countUp = this.count;
+
+      if (selection && selection.cellRange) {
+        const cellMeta = settings.getCellMeta(selection.cellRange.to.row, selection.cellRange.to.col);
+        const rowSpanned = cellMeta.rowSpanned ? cellMeta.rowSpanned - 1 : 0;
+        const lastRow = selection.cellRange.to.row + rowSpanned;
+        if (lastRow !== totalRows - 1 && lastRow + this.count >= totalRows) {
+          this.countDown = totalRows - lastRow - 1;
+        }
+        const firstRow = selection.cellRange.from.row;
+        if (firstRow !== 0 && firstRow - this.count < 0) {
+          this.countUp = firstRow;
+        }
+      }
     }
   }
 }

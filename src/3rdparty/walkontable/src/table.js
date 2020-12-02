@@ -603,6 +603,14 @@ class Table {
     return this.wot.wtViewport.rowsVisibleCalculator.count;
   }
 
+  getVisibleRowsCountDown() {
+    return this.wot.wtViewport.rowsVisibleCalculator.countDown;
+  }
+
+  getVisibleRowsCountUp() {
+    return this.wot.wtViewport.rowsVisibleCalculator.countUp;
+  }
+
   allRowsInViewport() {
     return this.wot.getSetting('totalRows') === this.getVisibleRowsCount();
   }

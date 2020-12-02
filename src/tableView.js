@@ -190,6 +190,7 @@ function TableView(instance) {
     preventOverflow: () => this.settings.preventOverflow,
     stretchH: () => that.settings.stretchH,
     data: instance.getDataAtCell,
+    getCellMeta: instance.getCellMeta,
     totalRows: () => instance.countRows(),
     totalColumns: () => instance.countCols(),
     fixedColumnsLeft: () => that.settings.fixedColumnsLeft,

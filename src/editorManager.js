@@ -28,7 +28,10 @@ function EditorManager(instance, priv, selection) {
     if (shiftKey) {
       selection.transformEnd(-1, 0);
     } else {
-      selection.transformStart(-1, 0);
+      const highlight = selection.selectedRange.current().highlight;
+      const cellMeta = instance.getCellMeta(highlight.row, highlight.col);
+      let rowSpanned = cellMeta.rowSpanned ? cellMeta.rowSpanned : 1;
+      selection.transformStart(-rowSpanned, 0);
     }
   }
 
@@ -37,7 +40,10 @@ function EditorManager(instance, priv, selection) {
       // expanding selection down with shift
       selection.transformEnd(1, 0);
     } else {
-      selection.transformStart(1, 0);
+      const highlight = selection.selectedRange.current().highlight;
+      const cellMeta = instance.getCellMeta(highlight.row, highlight.col);
+      let rowSpanned = cellMeta.rowSpanned ? cellMeta.rowSpanned : 1;
+      selection.transformStart(rowSpanned, 0);
     }
   }
 
@@ -225,13 +231,13 @@ function EditorManager(instance, priv, selection) {
         break;
 
       case KEY_CODES.PAGE_UP:
-        selection.transformStart(-instance.countVisibleRows(), 0);
+        selection.transformStart(-instance.countVisibleRowsUp(), 0);
         event.preventDefault(); // don't page up the window
         stopPropagation(event);
         break;
 
       case KEY_CODES.PAGE_DOWN:
-        selection.transformStart(instance.countVisibleRows(), 0);
+        selection.transformStart(instance.countVisibleRowsDown(), 0);
         event.preventDefault(); // don't page down the window
         stopPropagation(event);
         break;
