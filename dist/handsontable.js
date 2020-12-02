@@ -23,8 +23,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
- * Version: 6.2.8
- * Release date: 19/12/2018 (built at 02/12/2020 09:35:30)
+ * Version: 6.2.9
+ * Release date: 19/12/2018 (built at 02/12/2020 09:54:32)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -28329,16 +28329,16 @@ DefaultSettings.prototype = {
   columnsWithLeftBorder: null,
 
   /**
-   * @description
-   * Skips fixed overlays position resetting when scrolling
-   *
-   * @type {Boolean}
-   * @default false
-   *
-   * @example
-   * ```js
-   * skipResettingOverlays: true,
-   */
+  * @description
+  * Skips fixed overlays position resetting when scrolling
+  *
+  * @type {Boolean}
+  * @default false
+  *
+  * @example
+  * ```js
+  * skipResettingOverlays: true,
+  */
   skipResettingOverlays: false,
 
   /**
@@ -30047,9 +30047,9 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "02/12/2020 09:35:30";
+Handsontable.buildDate = "02/12/2020 09:54:32";
 Handsontable.packageName = "handsontable-labworks";
-Handsontable.version = "6.2.8";
+Handsontable.version = "6.2.9";
 var baseVersion = "";
 
 if (baseVersion) {
