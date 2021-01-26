@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 6.2.9
- * Release date: 19/12/2018 (built at 02/12/2020 09:54:32)
+ * Release date: 19/12/2018 (built at 26/01/2021 11:38:57)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -6936,7 +6936,7 @@ var browsers = {
     return !!document.documentMode;
   }),
   mobile: tester(function (ua) {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    return /Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 0 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
   }),
   safari: tester(function (ua, vendor) {
     return /Safari/.test(ua) && /Apple Computer/.test(vendor);
@@ -30047,7 +30047,7 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "02/12/2020 09:54:32";
+Handsontable.buildDate = "26/01/2021 11:38:57";
 Handsontable.packageName = "handsontable-labworks";
 Handsontable.version = "6.2.9";
 var baseVersion = "";
