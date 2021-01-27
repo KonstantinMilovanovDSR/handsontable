@@ -535,7 +535,7 @@ class Menu {
         }
       }
 
-      className = className.replace(/[^A-z0-9]/g, '_');
+      className = className.replace(/\W/g, '_');
       className = `${this.options.className}Sub_${className}`;
 
       container = document.querySelector(`.${this.options.className}.${className}`);

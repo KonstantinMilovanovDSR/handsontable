@@ -23,8 +23,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
- * Version: 6.2.9
- * Release date: 19/12/2018 (built at 26/01/2021 11:38:57)
+ * Version: 6.2.12
+ * Release date: 19/12/2018 (built at 27/01/2021 10:32:28)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -30047,9 +30047,9 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "26/01/2021 11:38:57";
+Handsontable.buildDate = "27/01/2021 10:32:28";
 Handsontable.packageName = "handsontable-labworks";
-Handsontable.version = "6.2.9";
+Handsontable.version = "6.2.12";
 var baseVersion = "";
 
 if (baseVersion) {
@@ -51484,7 +51484,7 @@ function () {
           }
         }
 
-        className = className.replace(/[^A-z0-9]/g, '_');
+        className = className.replace(/\W/g, '_');
         className = "".concat(this.options.className, "Sub_").concat(className);
         container = document.querySelector(".".concat(this.options.className, ".").concat(className));
       } else {
