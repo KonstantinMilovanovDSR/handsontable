@@ -23,8 +23,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
- * Version: 6.2.13
- * Release date: 19/12/2018 (built at 21/01/2022 14:26:04)
+ * Version: 6.2.14
+ * Release date: 19/12/2018 (built at 21/01/2022 15:31:24)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -37756,8 +37756,6 @@ function () {
     this.wot.wtSettings.settings.rowHeaderWidth = function () {
       return _this._modifyRowHeaderWidth(origRowHeaderWidth);
     };
-
-    this.refreshBorders = false;
   }
   /**
    *
@@ -37965,8 +37963,7 @@ function () {
         }
 
         if (wtOverlays) {
-          wtOverlays.refresh(!this.refreshBorders);
-          this.refreshBorders = false;
+          wtOverlays.refresh(true);
         }
       } else {
         if (this.isWorkingOnClone()) {
@@ -46508,9 +46505,9 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "21/01/2022 14:26:04";
+Handsontable.buildDate = "21/01/2022 15:31:24";
 Handsontable.packageName = "handsontable-labworks";
-Handsontable.version = "6.2.13";
+Handsontable.version = "6.2.14";
 var baseVersion = "";
 
 if (baseVersion) {
