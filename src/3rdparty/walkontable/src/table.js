@@ -59,6 +59,8 @@ class Table {
 
     // Fix for jumping row headers (https://github.com/handsontable/handsontable/issues/3850)
     this.wot.wtSettings.settings.rowHeaderWidth = () => this._modifyRowHeaderWidth(origRowHeaderWidth);
+
+    this.refreshBorders = false
   }
 
   /**
@@ -242,7 +244,8 @@ class Table {
         wtViewport.createVisibleCalculators();
       }
       if (wtOverlays) {
-        wtOverlays.refresh(true);
+        wtOverlays.refresh(!this.refreshBorders);
+        this.refreshBorders = false
       }
     } else {
       if (this.isWorkingOnClone()) {

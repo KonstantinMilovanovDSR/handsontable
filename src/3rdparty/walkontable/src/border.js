@@ -343,6 +343,10 @@ class Border {
     const columnsWithLeftBorder = this.wot.getSetting('columnsWithLeftBorder');
     const cacheCellSizes = this.wot.getSetting('cacheCellSizes');
 
+    if (cacheCellSizes && !fastDraw) {
+        this.sizeCache = {}
+    }
+    
     for (let i = 0; i < rowsCount; i += 1) {
       const s = this.wot.wtTable.rowFilter.renderedToSource(i);
 
