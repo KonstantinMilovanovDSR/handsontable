@@ -529,6 +529,7 @@ class ManualColumnResize extends BasePlugin {
   onBeforeColumnResize() {
     // clear the header height cache information
     this.hot.view.wt.wtViewport.hasOversizedColumnHeadersMarked = {};
+    this.hot.destroyEditor()
   }
 }
 

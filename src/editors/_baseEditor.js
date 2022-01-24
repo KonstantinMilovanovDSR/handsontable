@@ -1,5 +1,6 @@
 import { CellCoords } from './../3rdparty/walkontable/src';
 import { stringify } from './../helpers/mixed';
+import autoResize from './../../lib/autoResize/autoResize';
 
 export const EditorState = {
   VIRGIN: 'STATE_VIRGIN', // before editing
@@ -30,7 +31,9 @@ BaseEditor.prototype._fireCallbacks = function(result) {
   }
 };
 
-BaseEditor.prototype.init = function() {};
+BaseEditor.prototype.init = function() {
+    this.autoResize = autoResize();
+};
 
 BaseEditor.prototype.getValue = function() {
   throw Error('Editor getValue() method unimplemented');
@@ -45,7 +48,7 @@ BaseEditor.prototype.open = function() {
 };
 
 BaseEditor.prototype.close = function() {
-  throw Error('Editor close() method unimplemented');
+    this.autoResize.unObserve();
 };
 
 BaseEditor.prototype.prepare = function(row, col, prop, td, originalValue, cellProperties) {
