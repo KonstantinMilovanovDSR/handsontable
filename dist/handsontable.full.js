@@ -23,8 +23,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
- * Version: 6.2.14
- * Release date: 19/12/2018 (built at 21/01/2022 15:31:24)
+ * Version: 6.2.15
+ * Release date: 19/12/2018 (built at 26/01/2022 09:34:57)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -17547,14 +17547,14 @@ function Core(rootElement, userSettings) {
    */
 
 
-  this.render = function () {
+  this.render = function (initDraw) {
     if (instance.view) {
       instance.renderCall = true;
       instance.forceFullRender = true; // used when data was changed
 
       editorManager.lockEditor();
 
-      instance._refreshBorders(null);
+      instance._refreshBorders(false, true, initDraw);
 
       editorManager.unlockEditor();
     }
@@ -19870,8 +19870,9 @@ function Core(rootElement, userSettings) {
   this._refreshBorders = function () {
     var revertOriginal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var prepareEditorIfNeeded = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+    var initDraw = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     editorManager.destroyEditor(revertOriginal);
-    instance.view.render();
+    instance.view.render(initDraw);
 
     if (prepareEditorIfNeeded && selection.isSelected()) {
       editorManager.prepareEditor();
@@ -46505,9 +46506,9 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "21/01/2022 15:31:24";
+Handsontable.buildDate = "26/01/2022 09:34:57";
 Handsontable.packageName = "handsontable-labworks";
-Handsontable.version = "6.2.14";
+Handsontable.version = "6.2.15";
 var baseVersion = "";
 
 if (baseVersion) {

@@ -1426,12 +1426,12 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @memberof Core#
    * @function render
    */
-  this.render = function() {
+  this.render = function(initDraw) {
     if (instance.view) {
       instance.renderCall = true;
       instance.forceFullRender = true; // used when data was changed
       editorManager.lockEditor();
-      instance._refreshBorders(null);
+      instance._refreshBorders(false, true, initDraw);
       editorManager.unlockEditor();
     }
   };
@@ -3612,9 +3612,9 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Boolean} [revertOriginal=false] If `true`, the previous value will be restored. Otherwise, the edited value will be saved.
    * @param {Boolean} [prepareEditorIfNeeded=true] If `true` the editor under the selected cell will be prepared to open.
    */
-  this._refreshBorders = function(revertOriginal = false, prepareEditorIfNeeded = true) {
+  this._refreshBorders = function(revertOriginal = false, prepareEditorIfNeeded = true, initDraw = false) {
     editorManager.destroyEditor(revertOriginal);
-    instance.view.render();
+    instance.view.render(initDraw);
 
     if (prepareEditorIfNeeded && selection.isSelected()) {
       editorManager.prepareEditor();
