@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 6.2.15
- * Release date: 19/12/2018 (built at 26/01/2022 09:34:57)
+ * Release date: 19/12/2018 (built at 28/01/2022 11:56:01)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -30295,7 +30295,7 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "26/01/2022 09:34:57";
+Handsontable.buildDate = "28/01/2022 11:56:01";
 Handsontable.packageName = "handsontable-labworks";
 Handsontable.version = "6.2.15";
 var baseVersion = "";
@@ -56328,6 +56328,7 @@ function (_BasePlugin) {
     _this.dblclick = 0;
     _this.autoresizeTimeout = null;
     _this.manualColumnWidths = [];
+    _this.resizeByDblClick = false;
     (0, _element.addClass)(_this.handle, 'manualColumnResizer');
     (0, _element.addClass)(_this.guide, 'manualColumnResizerGuide');
     return _this;
@@ -56377,9 +56378,10 @@ function (_BasePlugin) {
         this.manualColumnWidths = initialColumnWidth;
       } else {
         this.manualColumnWidths = [];
-      } // Handsontable.hooks.register('beforeColumnResize');
-      // Handsontable.hooks.register('afterColumnResize');
+      }
 
+      this.resizeByDblClick = this.hot.getSettings().resizeByDblClick; // Handsontable.hooks.register('beforeColumnResize');
+      // Handsontable.hooks.register('afterColumnResize');
 
       this.bindEvents();
 
@@ -56399,6 +56401,8 @@ function (_BasePlugin) {
       } else if (!initialColumnWidth) {
         this.manualColumnWidths = [];
       }
+
+      this.resizeByDblClick = this.hot.getSettings().resizeByDblClick;
     }
     /**
      * Disables the plugin functionality for this Handsontable instance.
@@ -56696,7 +56700,7 @@ function (_BasePlugin) {
         this.setupGuidePosition();
         this.pressed = this.hot;
 
-        if (this.autoresizeTimeout === null) {
+        if (this.resizeByDblClick && this.autoresizeTimeout === null) {
           this.autoresizeTimeout = setTimeout(function () {
             return _this5.afterMouseDownTimeout();
           }, 500);
