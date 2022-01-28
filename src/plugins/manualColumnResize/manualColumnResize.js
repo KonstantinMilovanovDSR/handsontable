@@ -38,6 +38,7 @@ class ManualColumnResize extends BasePlugin {
     this.dblclick = 0;
     this.autoresizeTimeout = null;
     this.manualColumnWidths = [];
+    this.resizeByDblClick = false
 
     addClass(this.handle, 'manualColumnResizer');
     addClass(this.guide, 'manualColumnResizerGuide');
@@ -76,6 +77,7 @@ class ManualColumnResize extends BasePlugin {
     } else {
       this.manualColumnWidths = [];
     }
+    this.resizeByDblClick = this.hot.getSettings().resizeByDblClick;
 
     // Handsontable.hooks.register('beforeColumnResize');
     // Handsontable.hooks.register('afterColumnResize');
@@ -97,6 +99,7 @@ class ManualColumnResize extends BasePlugin {
     } else if (!initialColumnWidth) {
       this.manualColumnWidths = [];
     }
+    this.resizeByDblClick = this.hot.getSettings().resizeByDblClick;
   }
 
   /**
@@ -356,7 +359,7 @@ class ManualColumnResize extends BasePlugin {
       this.setupGuidePosition();
       this.pressed = this.hot;
 
-      if (this.autoresizeTimeout === null) {
+      if (this.resizeByDblClick && this.autoresizeTimeout === null) {
         this.autoresizeTimeout = setTimeout(() => this.afterMouseDownTimeout(), 500);
 
         this.hot._registerTimeout(this.autoresizeTimeout);
