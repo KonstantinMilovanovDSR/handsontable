@@ -761,6 +761,22 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
                 col: visualColumn
               };
 
+              if (cellMeta.autocompleteObjects) {
+                if (typeof value === 'string') {
+                  let parsedValue
+                  try {
+                    parsedValue = JSON.parse(value)
+                    if (typeof parsedValue !== 'object') {
+                      parsedValue = {name: value}
+                    }
+                  } catch {
+                    parsedValue = {name: value} 
+                  }
+                  const foundValue = cellMeta.data && cellMeta.data.find((item) => item.name == parsedValue.name)
+                  value = Object.assign({...cellMeta.emptyObject}, foundValue || parsedValue)
+                }
+              }
+
               if (source === 'Autofill.fill') {
                 const result = instance.runHooks('beforeAutofillInsidePopulate', index, direction, input, deltas, {}, selected);
 
@@ -1404,7 +1420,13 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
       rangeEach(topLeft.row, bottomRight.row, (row) => {
         rangeEach(topLeft.col, bottomRight.col, (column) => {
-          if (!this.getCellMeta(row, column).readOnly) {
+          const cellMeta = this.getCellMeta(row, column)
+          if (!cellMeta.readOnly) {
+            if (cellMeta.autocompleteObjects) {
+              changes.push([row, column, {...cellMeta.emptyObject}]);
+              return
+            } 
+
             changes.push([row, column, '']);
           }
         });
