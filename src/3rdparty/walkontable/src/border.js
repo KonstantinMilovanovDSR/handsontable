@@ -321,7 +321,7 @@ class Border {
    *
    * @param {Array} corners
    */
-  appear(corners, fastDraw) {
+  appear(corners, fastDraw, instanceBorders) {
     if (this.disabled) {
       return;
     }
@@ -412,6 +412,14 @@ class Border {
           width: toTDWidth,
           height: toTDHeight
         };
+        this.lastTimeCache = Date.now()
+        if (instanceBorders) {
+          Object.values(instanceBorders).forEach((item) => {
+            if (!item.lastTimeCache || (this.lastTimeCache - item.lastTimeCache > 100)) {
+              item.sizeCache = {}
+            }
+          })
+        }
       }
     }
     let width = toOffset.left + toTDWidth - minLeft;

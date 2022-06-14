@@ -23,8 +23,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
- * Version: 6.2.18
- * Release date: 19/12/2018 (built at 01/04/2022 11:01:35)
+ * Version: 6.2.19
+ * Release date: 19/12/2018 (built at 14/06/2022 12:06:01)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -40148,7 +40148,9 @@ function () {
 
   }, {
     key: "appear",
-    value: function appear(corners, fastDraw) {
+    value: function appear(corners, fastDraw, instanceBorders) {
+      var _this4 = this;
+
       if (this.disabled) {
         return;
       }
@@ -40240,6 +40242,15 @@ function () {
             width: toTDWidth,
             height: toTDHeight
           };
+          this.lastTimeCache = Date.now();
+
+          if (instanceBorders) {
+            Object.values(instanceBorders).forEach(function (item) {
+              if (!item.lastTimeCache || _this4.lastTimeCache - item.lastTimeCache > 100) {
+                item.sizeCache = {};
+              }
+            });
+          }
         }
       }
 
@@ -40421,7 +40432,7 @@ function () {
   }, {
     key: "getDimensionsFromHeader",
     value: function getDimensionsFromHeader(direction, fromIndex, toIndex, containerOffset) {
-      var _this4 = this;
+      var _this5 = this;
 
       var rootHotElement = this.wot.wtTable.wtRootElement.parentNode;
       var getHeaderFn = null;
@@ -40436,9 +40447,9 @@ function () {
       switch (direction) {
         case 'rows':
           getHeaderFn = function getHeaderFn() {
-            var _this4$wot$wtTable;
+            var _this5$wot$wtTable;
 
-            return (_this4$wot$wtTable = _this4.wot.wtTable).getRowHeader.apply(_this4$wot$wtTable, arguments);
+            return (_this5$wot$wtTable = _this5.wot.wtTable).getRowHeader.apply(_this5$wot$wtTable, arguments);
           };
 
           dimensionFn = function dimensionFn() {
@@ -40451,9 +40462,9 @@ function () {
 
         case 'columns':
           getHeaderFn = function getHeaderFn() {
-            var _this4$wot$wtTable2;
+            var _this5$wot$wtTable2;
 
-            return (_this4$wot$wtTable2 = _this4.wot.wtTable).getColumnHeader.apply(_this4$wot$wtTable2, arguments);
+            return (_this5$wot$wtTable2 = _this5.wot.wtTable).getColumnHeader.apply(_this5$wot$wtTable2, arguments);
           };
 
           dimensionFn = function dimensionFn() {
@@ -46500,9 +46511,9 @@ Handsontable.DefaultSettings = _defaultSettings.default;
 Handsontable.EventManager = _eventManager.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "01/04/2022 11:01:35";
+Handsontable.buildDate = "14/06/2022 12:06:01";
 Handsontable.packageName = "handsontable-labworks";
-Handsontable.version = "6.2.18";
+Handsontable.version = "6.2.19";
 var baseVersion = "";
 
 if (baseVersion) {
@@ -53195,7 +53206,7 @@ function () {
 
       if (this.settings.border) {
         // warning! border.appear modifies corners!
-        this.getBorder(wotInstance).appear(corners, fastDraw);
+        this.getBorder(wotInstance).appear(corners, fastDraw, this.instanceBorders);
       }
     }
   }]);
