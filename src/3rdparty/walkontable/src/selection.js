@@ -274,7 +274,7 @@ class Selection {
 
     if (this.settings.border) {
       // warning! border.appear modifies corners!
-      this.getBorder(wotInstance).appear(corners, fastDraw);
+      this.getBorder(wotInstance).appear(corners, fastDraw, this.instanceBorders);
     }
   }
 }
