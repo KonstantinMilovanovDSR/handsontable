@@ -12,7 +12,7 @@ function createHighlight({ layerLevel, areaCornerVisible }) {
     layerLevel: Math.min(layerLevel, 7),
     border: {
       width: 1,
-      color: '#4b89ff',
+      color: '#38B2CE',
       cornerVisible: areaCornerVisible,
     },
   });
