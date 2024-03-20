@@ -138,14 +138,14 @@ export function createSelectionController({ current, area, fill, custom } = {}) 
     className: 'current',
     border: {
       width: 2,
-      color: '#4b89ff',
+      color: '#38B2CE',
     },
   });
   const areaCtrl = area || new Walkontable.Selection({
     className: 'area',
     border: {
       width: 1,
-      color: '#4b89ff',
+      color: '#38B2CE',
     },
   });
   const fillCtrl = fill || new Walkontable.Selection({
